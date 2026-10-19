@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 from collections.abc import AsyncGenerator
@@ -41,9 +42,13 @@ class LangGraphAgentInstance(AgentInstance):
     async def stream_response(  # type: ignore[override]
         self, message: str, thread: Thread, user: User
     ) -> AsyncGenerator[dict[str, Any]]:
-        with self._tracing_client.start_as_current_span(
-            name=self.graph.name, input=message
-        ) as span:
+        has_tracer = hasattr(self._tracing_client, "start_as_current_span")
+        span_cm = (
+            self._tracing_client.start_as_current_span(name=self.graph.name, input=message)
+            if has_tracer
+            else contextlib.nullcontext(None)
+        )
+        with span_cm as span:
             run_id = uuid4()
 
             thread.status = ThreadStatus.busy
@@ -53,19 +58,24 @@ class LangGraphAgentInstance(AgentInstance):
                 "messages": [HumanMessage(content=message)],
             }
 
+            metadata: dict[str, Any] = {
+                "langfuse_session_id": str(thread.id),
+                "langfuse_user_id": str(user.id),
+                "langfuse_tags": ["production", "chat-bot"],
+            }
+            callbacks = []
+            if span and hasattr(span, "trace_id"):
+                metadata["trace_id"] = span.trace_id
+                callbacks.append(CallbackHandler())
+
             config = RunnableConfig(
                 configurable={
                     "thread_id": thread.id,
                     "user_id": user.id,
                 },
-                metadata={
-                    "langfuse_session_id": str(thread.id),
-                    "langfuse_user_id": str(user.id),
-                    "langfuse_tags": ["production", "chat-bot"],
-                    "trace_id": span.trace_id,
-                },
+                metadata=metadata,
                 run_id=run_id,
-                callbacks=[CallbackHandler()],
+                callbacks=callbacks,
             )
 
             try:

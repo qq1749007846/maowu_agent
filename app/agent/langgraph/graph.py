@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from typing import Any, TypedDict, cast
@@ -84,7 +85,12 @@ class Graph(ABC):
 
     def get_default_model(self) -> str:
         """Get the default model name."""
-        return str(self._custom_params.get("default_model", "openai/gpt-4o-mini"))
+        return str(
+            self._custom_params.get(
+                "default_model",
+                os.getenv("DEFAULT_MODEL", "openai/deepseek-v4-pro"),
+            )
+        )
 
     def get_default_temperature(self) -> float:
         """Get the default temperature."""

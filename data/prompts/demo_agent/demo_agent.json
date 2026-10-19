@@ -1,0 +1,9 @@
+{
+  "production": {
+    "content": "You are a helpful and intelligent AI assistant powered by DeepSeek-V4-Pro.",
+    "config": {
+      "model": "openai/deepseek-v4-pro",
+      "temperature": 0.7
+    }
+  }
+}

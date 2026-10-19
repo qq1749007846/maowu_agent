@@ -1,3 +1,5 @@
+import os
+
 from app.agent.config import AgentConfig
 from app.agent.factory import AgentFactory
 
@@ -7,9 +9,10 @@ def register_agents() -> None:
         agent_id="demo_agent",
         agent_class_path="app.agent.langgraph.demo.demo_agent.DemoAgent",
         config=AgentConfig(
-            prompt_source="langfuse",
-            checkpoint_type="postgres",
+            prompt_source=os.getenv("PROMPT_SOURCE", "file"),
+            checkpoint_type=os.getenv("CHECKPOINT_TYPE", "memory"),
             custom_params={
+                "default_model": os.getenv("DEFAULT_MODEL", "openai/deepseek-v4-pro"),
                 "max_iterations": 10,
                 "temperature": 0.7,
             },
