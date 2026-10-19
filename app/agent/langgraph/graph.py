@@ -16,6 +16,7 @@ from langgraph.graph.state import CompiledStateGraph
 
 from app.agent.langgraph.base_state import BaseState, State
 from app.agent.prompt import Prompt, PromptProvider
+from app.services.wma_service import WorkingMemoryAssembler
 
 logger = logging.getLogger(__name__)
 
@@ -135,11 +136,30 @@ class Graph(ABC):
             self.get_prompt_name(), self.get_prompt_label(), self.get_prompt_fallback()
         )
 
+        # 动态装配工作记忆（用户画像 + 相关排障踩坑经验 + 拟人化状态微调）
+        system_content = prompt.content
+        configurable = config.get("configurable", {})
+        user_id = configurable.get("user_id")
+        if user_id:
+            try:
+                user_query = ""
+                for msg in reversed(state.messages):
+                    if hasattr(msg, "content") and str(msg.content).strip():
+                        user_query = str(msg.content)
+                        break
+                wma = WorkingMemoryAssembler()
+                wma_ctx = wma.assemble(user_id=str(user_id), current_query=user_query)
+                wma_block = wma.format_to_prompt_block(wma_ctx)
+                if wma_block:
+                    system_content = f"{system_content}\n{wma_block}"
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Failed to assemble working memory: %s", exc)
+
         model = self._with_tools(self.get_model(prompt), self.get_tools())
 
         template = ChatPromptTemplate.from_messages(
             [
-                ("system", prompt.content),
+                ("system", system_content),
                 MessagesPlaceholder("history"),
             ]
         ).partial(**self.get_prompt_placeholders())
