@@ -1,40 +1,24 @@
 services:
-  db:
-    image: pgvector/pgvector:pg16
-    container_name: agent_template
-    environment:
-      POSTGRES_DB: agent_template
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_HOST_AUTH_METHOD: trust
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  app:
-    build: .
-    container_name: agent_template_app
+  maowu-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: maowu-agent:latest
+    container_name: maowu_agent
+    restart: always
     ports:
       - "8000:8000"
-    depends_on:
-      db:
-        condition: service_healthy
+    env_file:
+      - .env
     environment:
       - HOST=0.0.0.0
       - PORT=8000
-      - DEBUG=true
-      - RELOAD=true
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/agent_template
     volumes:
-      - .:/app
-    restart: unless-stopped
-
-volumes:
-  postgres_data: 
+      # 持久化长期记忆库 (ltm.db) 和 自定义提示词
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
