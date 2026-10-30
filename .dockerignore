@@ -72,3 +72,6 @@ README.md
 
 # Local persistent database
 data/*.db
+
+# AstrBot persistent data
+astrbot_data/

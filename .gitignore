@@ -11,3 +11,6 @@ wheels/
 .venv
 
 .env
+
+# AstrBot persistent data
+astrbot_data/

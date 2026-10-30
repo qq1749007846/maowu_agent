@@ -1,4 +1,5 @@
 services:
+  # MaoWu Agent 核心认知与记忆引擎
   maowu-agent:
     build:
       context: .
@@ -22,3 +23,19 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+  # AstrBot 可视化面板与 QQ 协议网关
+  astrbot:
+    image: m.daocloud.io/docker.io/soulter/astrbot:latest
+    container_name: astrbot
+    restart: always
+    ports:
+      - "6185:6185"
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      # 持久化 AstrBot QQ 登录凭据与客户端配置
+      - ./astrbot_data:/AstrBot/data
+    depends_on:
+      maowu-agent:
+        condition: service_healthy
