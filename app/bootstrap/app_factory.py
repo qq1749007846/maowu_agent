@@ -10,7 +10,7 @@ from app.container import Container
 from app.http.middleware.cors_middleware import CORSConfig, setup_cors_middleware
 from app.utils.utils import is_valid_uuid4
 
-from ..http.routes import health_router, qq_router, runs_router, thread_router
+from ..http.routes import astrbot_router, health_router, runs_router, thread_router
 from .agent_registry import register_agents
 from .config import AppConfig
 
@@ -21,7 +21,7 @@ def create_app(config: AppConfig) -> FastAPI:
 
     app = FastAPI(
         title="MaoWu Agent",
-        description="Tech & Career Growth Mentor Agent Runtime with QQ OneBot integration",
+        description="Tech & Career Growth Mentor Agent Runtime with AstrBot integration",
         version="0.1.0",
         debug=config.debug,
     )
@@ -43,12 +43,13 @@ def create_app(config: AppConfig) -> FastAPI:
         transformer=lambda a: a,
     )
 
+    # 挂载核心 API
     app.include_router(runs_router, prefix="/api/v1")
     app.include_router(thread_router, prefix="/api/v1")
     app.include_router(health_router, prefix="/api/v1")
-    app.include_router(qq_router, prefix="/api/v1")
-    # 增加短路径兼容 /api/qq/webhook
-    app.include_router(qq_router, prefix="/api")
+
+    # 挂载 AstrBot 适配路由（支持标准 OpenAI /v1/chat/completions 及 /api/v1/astrbot/chat）
+    app.include_router(astrbot_router)
 
     # FastAPIInstrumentor.instrument_app(app, excluded_urls="/api/v1/health*,/docs,/metrics,/openapi.json")
     PrometheusInstrumentator(
