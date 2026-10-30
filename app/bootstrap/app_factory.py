@@ -10,7 +10,7 @@ from app.container import Container
 from app.http.middleware.cors_middleware import CORSConfig, setup_cors_middleware
 from app.utils.utils import is_valid_uuid4
 
-from ..http.routes import health_router, runs_router, thread_router
+from ..http.routes import health_router, qq_router, runs_router, thread_router
 from .agent_registry import register_agents
 from .config import AppConfig
 
@@ -20,9 +20,9 @@ def create_app(config: AppConfig) -> FastAPI:
     register_agents()
 
     app = FastAPI(
-        title="Raw LangGraph",
-        description="A test application",
-        version="0.0.1",
+        title="MaoWu Agent",
+        description="Tech & Career Growth Mentor Agent Runtime with QQ OneBot integration",
+        version="0.1.0",
         debug=config.debug,
     )
 
@@ -46,6 +46,9 @@ def create_app(config: AppConfig) -> FastAPI:
     app.include_router(runs_router, prefix="/api/v1")
     app.include_router(thread_router, prefix="/api/v1")
     app.include_router(health_router, prefix="/api/v1")
+    app.include_router(qq_router, prefix="/api/v1")
+    # 增加短路径兼容 /api/qq/webhook
+    app.include_router(qq_router, prefix="/api")
 
     # FastAPIInstrumentor.instrument_app(app, excluded_urls="/api/v1/health*,/docs,/metrics,/openapi.json")
     PrometheusInstrumentator(
