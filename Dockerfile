@@ -1,7 +1,7 @@
 # ==========================================
-# MaoWu Agent 生产级 Docker 镜像构建文件
+# MaoWu Agent 生产级 Docker 镜像构建文件（全链路国内镜像加速）
 # ==========================================
-FROM python:3.12-slim
+FROM docker.m.daocloud.io/library/python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -12,21 +12,22 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# 安装必要的系统运行时依赖
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# 1. 替换 Debian apt 源为清华大学开源镜像站，极速安装系统依赖
+RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list.d/debian.sources 2>/dev/null \
+    || sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list \
+    && apt-get update && apt-get install -y --no-install-recommends \
     curl \
     gcc \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 先复制依赖清单，充分利用 Docker 缓存层
+# 2. 先复制依赖清单，充分利用 Docker 缓存层
 COPY requirements.txt .
 
-# 优先使用国内清华源或官方源安装依赖
-RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir -r requirements.txt \
-    || pip install --no-cache-dir -r requirements.txt
+# 3. 使用国内清华 pip 源安装 Python 依赖
+RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir -r requirements.txt
 
-# 拷贝项目源码
+# 4. 拷贝项目源码
 COPY . .
 
 # 创建数据与持久化目录
