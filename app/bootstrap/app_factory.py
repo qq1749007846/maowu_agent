@@ -1,8 +1,11 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 from uuid import uuid4
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 # from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from prometheus_fastapi_instrumentator import Instrumentator as PrometheusInstrumentator
@@ -15,6 +18,8 @@ from app.utils.utils import is_valid_uuid4
 from ..http.routes import astrbot_router, health_router, runs_router, thread_router
 from .agent_registry import register_agents
 from .config import AppConfig
+
+STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
 
 @asynccontextmanager
@@ -63,6 +68,17 @@ def create_app(config: AppConfig) -> FastAPI:
 
     # 挂载 AstrBot 与子代理路由（支持标准 OpenAI /v1/chat/completions 及 /api/v1/subagents/tasks）
     app.include_router(astrbot_router)
+
+    # 挂载静态资源与根路径前端交互页面
+    if STATIC_DIR.exists():
+        app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+    @app.get("/", include_in_schema=False)
+    async def serve_index():
+        index_file = STATIC_DIR / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        return {"status": "ok", "message": "MaoWu Agent API is running."}
 
     # FastAPIInstrumentor.instrument_app(app, excluded_urls="/api/v1/health*,/docs,/metrics,/openapi.json")
     PrometheusInstrumentator(

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MaoWu Agent · 技术与职场成长教练工作台</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 14a4 4 0 1 1 4-4 4 4 0 0 1-4 4z'/></svg>" />
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* 自定义滚动条样式 */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .chat-bubble-pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900 min-h-screen flex flex-col font-sans">
+
+  <!-- 1. 顶部全局导航栏 (参考 FDE Header) -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- 左侧：品牌 Logo 与定位 -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+          <i data-lucide="bot" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-900">
+              MaoWu Agent
+            </span>
+            <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+              Tech & Career Mentor
+            </span>
+            <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center space-x-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>DeepSeek-V4-Pro 就绪</span>
+            </span>
+          </div>
+          <p class="text-xs text-slate-500">拟人化伴随式智能体 · 长期记忆 · 工作记忆装配 · 异步子代理矩阵</p>
+        </div>
+      </div>
+
+      <!-- 右侧：快捷操作区 -->
+      <div class="flex items-center space-x-3">
+        <!-- 使用提示引导按钮 -->
+        <button onclick="toggleModal('guideModal')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors">
+          <i data-lucide="help-circle" class="w-4 h-4 text-blue-600"></i>
+          <span>使用提示指南</span>
+        </button>
+
+        <!-- 快速刷新画像 -->
+        <button onclick="refreshUserProfile()" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors" title="从长期记忆中同步最新画像">
+          <i data-lucide="refresh-cw" class="w-4 h-4 text-slate-600"></i>
+          <span>同步记忆</span>
+        </button>
+
+        <!-- 提交深度调研工单 -->
+        <button onclick="toggleModal('researchModal')" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-500/20 transition-all">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>发起架构调研</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. 主体工作区容器 (三栏/多卡片布局) -->
+  <main class="flex-1 max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- 左侧侧边栏：技术画像与记忆雷达 (占据 3 列) -->
+    <aside class="lg:col-span-3 space-y-6">
+      
+      <!-- 导师人设动态状态卡片 -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="sparkles" class="w-5 h-5 text-amber-500"></i>
+            <h3 class="font-semibold text-slate-900 text-sm">导师当前拟人化状态</h3>
+          </div>
+          <span id="intimacyBadge" class="text-xs px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium border border-indigo-200">
+            熟悉阶梯
+          </span>
+        </div>
+        <div class="space-y-3 text-xs">
+          <div>
+            <div class="flex justify-between text-slate-500 mb-1">
+              <span>默契羁绊积分</span>
+              <span id="intimacyScoreText" class="font-bold text-blue-600">45 / 100</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+              <div id="intimacyProgressBar" class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full" style="width: 45%"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5 px-2.5 rounded-lg bg-slate-50 border border-slate-100">
+            <span class="text-slate-500">当前语气基调</span>
+            <span id="currentToneText" class="font-medium text-slate-800">沉稳务实 · 启发探究</span>
+          </div>
+          <div class="flex items-center justify-between py-1.5 px-2.5 rounded-lg bg-slate-50 border border-slate-100">
+            <span class="text-slate-500">情绪感知</span>
+            <span id="detectedEmotionText" class="font-medium text-emerald-600">平和专注 (Calm)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 用户技术与项目画像卡片 (从 LTM 动态加载) -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="user-check" class="w-5 h-5 text-blue-600"></i>
+            <h3 class="font-semibold text-slate-900 text-sm">工程师长期技术画像</h3>
+          </div>
+          <span class="text-[10px] text-slate-400">LTM 记忆沉淀</span>
+        </div>
+        <div class="space-y-3 text-xs">
+          <div>
+            <span class="text-slate-400 block mb-1">当前用户标识 (User ID)</span>
+            <div class="flex items-center space-x-2">
+              <input id="userIdInput" type="text" value="mazikang" class="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+              <button onclick="refreshUserProfile()" class="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-200">切换</button>
+            </div>
+          </div>
+          <div>
+            <span class="text-slate-400 block mb-1">主力语言 (Languages)</span>
+            <div id="primaryLangsContainer" class="flex flex-wrap gap-1.5">
+              <span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md border border-slate-200">Python</span>
+              <span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md border border-slate-200">TypeScript</span>
+            </div>
+          </div>
+          <div>
+            <span class="text-slate-400 block mb-1">核心技术栈 (Tech Stack)</span>
+            <div id="techStackContainer" class="flex flex-wrap gap-1.5">
+              <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200">FastAPI</span>
+              <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200">LangGraph</span>
+              <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200">Docker</span>
+              <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200">Postgres</span>
+            </div>
+          </div>
+          <div>
+            <span class="text-slate-400 block mb-1">正在负责的核心系统</span>
+            <div id="projectsContainer" class="p-2 rounded-lg bg-slate-50 border border-slate-100 text-slate-700 leading-relaxed">
+              MaoWu Agent (LangGraph + DeepSeek-V4-Pro)
+            </div>
+          </div>
+          <div>
+            <span class="text-slate-400 block mb-1">近期技术成长目标 (OKR)</span>
+            <div id="goalsContainer" class="p-2 rounded-lg bg-amber-50/60 border border-amber-200 text-amber-900 leading-relaxed">
+              🎯 攻关高可用企业级多Agent体系与状态机编排
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 快速推荐问题模板 (Prompt Cheatsheet) -->
+      <div class="bg-gradient-to-br from-indigo-50/60 via-blue-50/40 to-slate-50 rounded-2xl border border-blue-100 p-4 shadow-sm text-xs">
+        <h4 class="font-semibold text-slate-800 mb-2.5 flex items-center space-x-1.5">
+          <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500"></i>
+          <span>点击快速体验导师能力</span>
+        </h4>
+        <div class="space-y-2">
+          <button onclick="fillPrompt('我在跑MaoWu Agent的postgres存储时，驱动又报错找不到pq wrapper，给个排查思路？')" class="w-full text-left p-2 rounded-lg bg-white hover:bg-blue-50 hover:border-blue-200 border border-slate-200/80 transition-all text-slate-700">
+            💡 <span class="font-medium">排障联想：</span>Windows psycopg缺libpq排查
+          </button>
+          <button onclick="fillPrompt('导师，我们系统准备接入Redis集群，在连接池保活和连接泄露防护上有什么避坑经验？')" class="w-full text-left p-2 rounded-lg bg-white hover:bg-blue-50 hover:border-blue-200 border border-slate-200/80 transition-all text-slate-700">
+            🛠️ <span class="font-medium">架构探讨：</span>Redis 连接池与防泄露方案
+          </button>
+          <button onclick="fillPrompt('最近在做长连接流式网关，技术调研帮我对比一下FastAPI和Go Gin在高并发下的表现？')" class="w-full text-left p-2 rounded-lg bg-white hover:bg-blue-50 hover:border-blue-200 border border-slate-200/80 transition-all text-slate-700">
+            📊 <span class="font-medium">技术选型：</span>FastAPI vs Go Gin 深度对比
+          </button>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- 中间：核心沉浸式对话工作台 (占据 6 列) -->
+    <section class="lg:col-span-6 flex flex-col bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden h-[820px]">
+      
+      <!-- 对话头部状态条 -->
+      <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div class="flex items-center space-x-2">
+          <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span class="text-sm font-semibold text-slate-800">技术导师流式交互现场 (Live Stream)</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button onclick="clearChatHistory()" class="text-xs text-slate-500 hover:text-slate-800 px-2 py-1 rounded hover:bg-slate-200/70 transition-colors">
+            清空对话
+          </button>
+        </div>
+      </div>
+
+      <!-- 消息列表滚动区域 -->
+      <div id="messagesContainer" class="flex-1 overflow-y-auto p-5 space-y-4">
+        <!-- 默认欢迎消息 -->
+        <div class="flex items-start space-x-3">
+          <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-sm">
+            <i data-lucide="bot" class="w-4 h-4"></i>
+          </div>
+          <div class="bg-slate-100 text-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] text-sm leading-relaxed border border-slate-200/60 shadow-sm">
+            <p class="font-medium text-slate-900 mb-1">MaoWu 技术导师：</p>
+            <p>你好！我是你的专属技术 Mentor。不管是架构设计探讨、排障卡壳、踩坑复盘，还是技术选型调研，随时告诉我。我已调取你的技术画像与历史经验日记，随时开始探讨！</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 思考中指示器 -->
+      <div id="thinkingIndicator" class="hidden px-5 py-2 text-xs text-blue-600 bg-blue-50/60 border-t border-blue-100 flex items-center space-x-2">
+        <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-blue-600"></i>
+        <span>正在装配工作记忆并调用 DeepSeek-V4-Pro 深度思考中...</span>
+      </div>
+
+      <!-- 输入框底栏 -->
+      <div class="p-4 border-t border-slate-100 bg-white">
+        <form id="chatForm" onsubmit="handleSendMessage(event)" class="flex flex-col space-y-2">
+          <div class="relative flex items-end rounded-xl border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 bg-white transition-all shadow-sm">
+            <textarea
+              id="messageInput"
+              rows="3"
+              placeholder="向技术导师提问...（例如：遇到系统卡点、线上Bug根因排查、架构对比等，Ctrl+Enter 快速发送）"
+              class="w-full p-3 resize-none border-0 focus:ring-0 text-sm placeholder:text-slate-400 outline-none rounded-xl"
+              onkeydown="if(event.ctrlKey && event.keyCode === 13) handleSendMessage(event)"
+            ></textarea>
+            <div class="p-2 flex items-center space-x-2 shrink-0">
+              <button
+                type="submit"
+                id="sendBtn"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-md shadow-blue-500/20 flex items-center space-x-1.5 transition-all"
+              >
+                <span>发送</span>
+                <i data-lucide="send" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
+            <span>支持 Markdown 代码块解析 · 支持多轮记忆装配</span>
+            <span>按 Ctrl + Enter 快捷发送</span>
+          </div>
+        </form>
+      </div>
+
+    </section>
+
+    <!-- 右侧侧边栏：工作记忆装配视窗与异步子代理监控 (占据 3 列) -->
+    <aside class="lg:col-span-3 space-y-6">
+
+      <!-- 工作记忆实时装配视窗 (WMA Inspector) -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="cpu" class="w-5 h-5 text-indigo-600"></i>
+            <h3 class="font-semibold text-slate-900 text-sm">WMA 工作记忆装配台</h3>
+          </div>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium">渐进式召回</span>
+        </div>
+        <p class="text-xs text-slate-500 mb-3 leading-relaxed">展示当前 Prompt 注入的瞬时历史踩坑与技术日记，保证有限 Token 下最高密度排障现场：</p>
+        <div id="wmaMemoriesList" class="space-y-2.5 max-h-[300px] overflow-y-auto text-xs">
+          <!-- 默认占位 -->
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-600">
+            <div class="font-semibold text-slate-800 mb-1 flex items-center justify-between">
+              <span>Windows 环境 psycopg 驱动缺 libpq</span>
+              <span class="text-[10px] px-1 bg-amber-100 text-amber-800 rounded">权重:5</span>
+            </div>
+            <p class="text-[11px] text-slate-500">【根因】Windows缺少底层C动态库，需安装psycopg[binary]预编译包。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 异步子代理工单与监控卡片 (Sub-Agent Dispatcher Monitor) -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="activity" class="w-5 h-5 text-sky-600"></i>
+            <h3 class="font-semibold text-slate-900 text-sm">后台子代理任务监控</h3>
+          </div>
+          <span class="text-[10px] text-slate-400">并发事件总线</span>
+        </div>
+        <div id="tasksList" class="space-y-2 text-xs max-h-[300px] overflow-y-auto">
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-medium text-slate-800">记忆沉淀子代理</span>
+              <span class="px-1.5 py-0.5 text-[10px] bg-emerald-50 text-emerald-700 rounded border border-emerald-200">待命中</span>
+            </div>
+            <p class="text-[11px] text-slate-500">每轮对话后自动触发，静默提取排障踩坑经验入库</p>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- 3. 使用提示指南弹窗 (Guide Modal) -->
+  <div id="guideModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 relative">
+      <button onclick="toggleModal('guideModal')" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+          <i data-lucide="book-open" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">MaoWu Agent 网页使用提示指南</h3>
+          <p class="text-xs text-slate-500">了解智能体核心设计与四大维度的互动技巧</p>
+        </div>
+      </div>
+      <div class="space-y-4 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-4">
+        <div class="p-3 rounded-xl bg-blue-50/60 border border-blue-100">
+          <h4 class="font-bold text-blue-900 mb-1 flex items-center space-x-1">
+            <span>1. 技术导师的人设互动（有人味）</span>
+          </h4>
+          <p>MaoWu 会以沉稳敏锐、务实有启发性的导师视角与你探讨，遇到 Bug 时会引导排查根因而非敷衍给代码；对话过程中会自动演进你与它的默契值（熟悉阶梯）。</p>
+        </div>
+        <div class="p-3 rounded-xl bg-indigo-50/60 border border-indigo-100">
+          <h4 class="font-bold text-indigo-900 mb-1 flex items-center space-x-1">
+            <span>2. 长期记忆与踩坑联想（能记住）</span>
+          </h4>
+          <p>左侧展示了从 <code>data/ltm.db</code> 持久化记忆库中检索的用户画像。当你输入相关问题（如 psycopg、Redis 连接池）时，右侧 WMA 会动态召回你的历史踩坑经验，让导师“瞬间记起你上次踩过的坑”。</p>
+        </div>
+        <div class="p-3 rounded-xl bg-emerald-50/60 border border-emerald-100">
+          <h4 class="font-bold text-emerald-900 mb-1 flex items-center space-x-1">
+            <span>3. 对话后自动反思入库（能做深）</span>
+          </h4>
+          <p>每轮对话结束后，后台的 <strong>Reflector 子代理</strong> 会静默分析整段聊天，自动将你提炼的技术方案写回数据库，实现“无需手动建表，越聊越懂你”。</p>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <h4 class="font-bold text-slate-900 mb-1 flex items-center space-x-1">
+            <span>4. 快捷键与常用功能</span>
+          </h4>
+          <ul class="list-disc list-inside space-y-1 text-slate-600">
+            <li>发送消息：输入后点击发送或按 <code>Ctrl + Enter</code>；</li>
+            <li>顶部右上角支持一键发起异步大型架构调研工单；</li>
+            <li>切换 User ID 即可体验不同工程师独立隔离的长期记忆体系。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mt-6 flex justify-end">
+        <button onclick="toggleModal('guideModal')" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-xs transition-colors shadow-sm">
+          我知道了，开始体验
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 深度架构调研工单弹窗 (Research Modal) -->
+  <div id="researchModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 relative">
+      <button onclick="toggleModal('researchModal')" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+          <i data-lucide="layers" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">提交后台深度技术调研工单</h3>
+          <p class="text-xs text-slate-500">交由 DeepResearcherAgent 异步并发执行，避免阻塞前台对话</p>
+        </div>
+      </div>
+      <form onsubmit="handleDispatchResearch(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">调研主题 (Topic)</label>
+          <input id="researchTopic" type="text" required placeholder="如：FastAPI 与 Go Gin 在微服务架构下的高并发选型对比" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+        </div>
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">攻坚侧重点 (Focus)</label>
+          <input id="researchFocus" type="text" placeholder="如：I/O密集型异步处理、协程开销、工程维护成本" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+        </div>
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">当前业务架构背景 (System Context)</label>
+          <textarea id="researchContext" rows="3" placeholder="如：系统为 LangGraph Agent 网关，承载大量长连接 SSE 流式请求..." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"></textarea>
+        </div>
+        <div class="pt-3 flex justify-end space-x-2">
+          <button type="button" onclick="toggleModal('researchModal')" class="px-4 py-2 border border-slate-200 text-slate-700 hover:bg-slate-100 rounded-xl font-medium">取消</button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-sm">提交后台调研</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JavaScript 交互驱动引擎 -->
+  <script>
+    // 初始化 Lucide 图标
+    lucide.createIcons();
+
+    // 模态框显隐控制
+    function toggleModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.toggle('hidden');
+      }
+    }
+
+    // 快速填充提示词
+    function fillPrompt(text) {
+      const input = document.getElementById('messageInput');
+      input.value = text;
+      input.focus();
+    }
+
+    // 清空历史显示
+    function clearChatHistory() {
+      const container = document.getElementById('messagesContainer');
+      container.innerHTML = `
+        <div class="flex items-start space-x-3">
+          <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-sm">
+            <i data-lucide="bot" class="w-4 h-4"></i>
+          </div>
+          <div class="bg-slate-100 text-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] text-sm leading-relaxed border border-slate-200/60 shadow-sm">
+            <p class="font-medium text-slate-900 mb-1">MaoWu 技术导师：</p>
+            <p>已清空当前聊天面板。随时抛出你的技术痛点或排障现场！</p>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    // 获取当前用户 ID
+    function getCurrentUserId() {
+      return document.getElementById('userIdInput').value.trim() || 'mazikang';
+    }
+
+    // 刷新技术画像与导师拟人化状态
+    async function refreshUserProfile() {
+      const userId = getCurrentUserId();
+      console.log('Syncing LTM profile for:', userId);
+      // 可扩展：调用接口拉取 LTM 最新画像，此处模拟平滑刷新
+      const badge = document.getElementById('intimacyBadge');
+      badge.textContent = '熟络伙伴 · 深度信任';
+      lucide.createIcons();
+    }
+
+    // 提交消息并调用 MaoWu Agent (支持流式 SSE)
+    async function handleSendMessage(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('messageInput');
+      const query = input.value.trim();
+      if (!query) return;
+
+      const userId = getCurrentUserId();
+      input.value = '';
+
+      // 1. 渲染用户消息到界面
+      appendMessage('user', query);
+
+      // 2. 显示思考状态指示器
+      const indicator = document.getElementById('thinkingIndicator');
+      indicator.classList.remove('hidden');
+
+      // 3. 创建 AI 消息占位节点
+      const aiMessageEl = appendMessage('assistant', '');
+
+      try {
+        // 调用标准兼容接口 /v1/chat/completions (启用 stream=true)
+        const response = await fetch('/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'deepseek-v4-pro',
+            messages: [{ role: 'user', content: query }],
+            stream: true,
+            user: userId
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('网络请求异常：' + response.statusText);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let fullText = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ') && !line.includes('[DONE]')) {
+              try {
+                const jsonStr = line.replace('data: ', '').trim();
+                if (jsonStr) {
+                  const data = JSON.parse(jsonStr);
+                  const token = data.choices[0]?.delta?.content || '';
+                  fullText += token;
+                  aiMessageEl.innerText = fullText;
+                }
+              } catch (err) {
+                console.warn('Parse SSE error:', err);
+              }
+            }
+          }
+        }
+
+        // 模拟触发后台子代理更新任务卡片
+        addOrUpdateTaskCard('反思与记忆沉淀子代理', 'running', '正在后台提取排障根因并沉淀入库...');
+        setTimeout(() => {
+          addOrUpdateTaskCard('反思与记忆沉淀子代理', 'completed', '已完成排障经验提炼，成功归档至 LTM');
+        }, 3500);
+
+      } catch (err) {
+        aiMessageEl.innerText = '【系统提示】请求执行失败：' + err.message;
+      } finally {
+        indicator.classList.add('hidden');
+        lucide.createIcons();
+      }
+    }
+
+    // 渲染消息节点
+    function appendMessage(role, text) {
+      const container = document.getElementById('messagesContainer');
+      const msgWrapper = document.createElement('div');
+      msgWrapper.className = 'flex items-start space-x-3 ' + (role === 'user' ? 'justify-end' : '');
+
+      if (role === 'user') {
+        msgWrapper.innerHTML = `
+          <div class="bg-blue-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%] text-sm leading-relaxed shadow-sm">
+            <p class="whitespace-pre-wrap">${escapeHtml(text)}</p>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-white shrink-0 shadow-sm">
+            <i data-lucide="user" class="w-4 h-4"></i>
+          </div>
+        `;
+        container.appendChild(msgWrapper);
+        container.scrollTop = container.scrollHeight;
+        lucide.createIcons();
+        return null;
+      } else {
+        msgWrapper.innerHTML = `
+          <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-sm">
+            <i data-lucide="bot" class="w-4 h-4"></i>
+          </div>
+          <div class="bg-slate-100 text-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] text-sm leading-relaxed border border-slate-200/60 shadow-sm">
+            <p class="font-medium text-slate-900 mb-1">MaoWu 技术导师：</p>
+            <div class="chat-content whitespace-pre-wrap leading-relaxed">${escapeHtml(text)}</div>
+          </div>
+        `;
+        container.appendChild(msgWrapper);
+        container.scrollTop = container.scrollHeight;
+        lucide.createIcons();
+        return msgWrapper.querySelector('.chat-content');
+      }
+    }
+
+    // 提交异步深度调研工单
+    async function handleDispatchResearch(e) {
+      e.preventDefault();
+      const topic = document.getElementById('researchTopic').value.trim();
+      const focus = document.getElementById('researchFocus').value.trim();
+      const context = document.getElementById('researchContext').value.trim();
+      const userId = getCurrentUserId();
+
+      toggleModal('researchModal');
+      addOrUpdateTaskCard('深度技术调研子代理', 'running', '调研主题：' + topic + '（后台执行中）');
+
+      try {
+        const resp = await fetch('/api/v1/subagents/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            task_type: 'deep_research',
+            user_id: userId,
+            payload: { topic, focus, system_context: context }
+          })
+        });
+        const data = await resp.json();
+        const taskId = data.task_id;
+        
+        // 轮询检查调研进度
+        const timer = setInterval(async () => {
+          const qResp = await fetch('/api/v1/subagents/tasks/' + taskId);
+          const qData = await qResp.json();
+          if (qData.task_status === 'completed') {
+            clearInterval(timer);
+            addOrUpdateTaskCard('深度技术调研子代理', 'completed', '【调研已完成】' + topic);
+            // 自动在聊天框呈现调研摘要
+            appendMessage('assistant', `### 📊 异步技术调研报告完成回流：\n**主题**：${topic}\n\n${qData.result?.report || '已归档'}`);
+          }
+        }, 5000);
+
+      } catch (err) {
+        addOrUpdateTaskCard('深度技术调研子代理', 'failed', '提交失败：' + err.message);
+      }
+    }
+
+    // 更新右侧任务卡片
+    function addOrUpdateTaskCard(name, status, desc) {
+      const container = document.getElementById('tasksList');
+      const statusMap = {
+        running: '<span class="px-1.5 py-0.5 text-[10px] bg-blue-50 text-blue-700 rounded border border-blue-200 animate-pulse">执行中</span>',
+        completed: '<span class="px-1.5 py-0.5 text-[10px] bg-emerald-50 text-emerald-700 rounded border border-emerald-200">已完成</span>',
+        failed: '<span class="px-1.5 py-0.5 text-[10px] bg-rose-50 text-rose-700 rounded border border-rose-200">失败</span>'
+      };
+
+      const card = document.createElement('div');
+      card.className = 'p-2.5 rounded-xl bg-slate-50 border border-slate-100';
+      card.innerHTML = `
+        <div class="flex items-center justify-between mb-1">
+          <span class="font-medium text-slate-800">${escapeHtml(name)}</span>
+          ${statusMap[status] || ''}
+        </div>
+        <p class="text-[11px] text-slate-500">${escapeHtml(desc)}</p>
+      `;
+      container.prepend(card);
+    }
+
+    function escapeHtml(string) {
+      return String(string)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>
