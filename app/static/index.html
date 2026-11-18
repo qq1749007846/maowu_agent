@@ -106,6 +106,42 @@
         </div>
       </div>
 
+      <!-- 模块四：主动关怀与敏捷追踪中枢 (Proactive Mentor Hub) -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="bell-ring" class="w-5 h-5 text-violet-600"></i>
+            <h3 class="font-semibold text-slate-900 text-sm">敏捷追踪与复盘关怀</h3>
+          </div>
+          <span id="proactiveStatusBadge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+            防扰守卫就绪
+          </span>
+        </div>
+        <div class="space-y-2.5 text-xs">
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
+            <div class="flex justify-between text-slate-600">
+              <span>免扰时段守卫：</span>
+              <span id="proactiveQuietHoursText" class="font-medium text-slate-800">23:00 - 08:30</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>主动触达状态：</span>
+              <span id="proactiveCanContactText" class="font-medium text-emerald-600">允许触达</span>
+            </div>
+          </div>
+          <div class="pt-1 flex flex-col space-y-1.5">
+            <span class="text-slate-500 font-medium text-[11px]">手动体验主动意愿研判：</span>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button onclick="handleTriggerProactive('weekly_review')" class="p-1.5 rounded-lg bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200 text-center font-medium transition-colors">
+                📅 周五技术复盘
+              </button>
+              <button onclick="handleTriggerProactive('blocker_followup')" class="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-center font-medium transition-colors">
+                🔍 排障卡点回访
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 用户技术与项目画像卡片 (从 LTM 动态加载) -->
       <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
         <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
@@ -187,6 +223,28 @@
         <div class="flex items-center space-x-2">
           <button onclick="clearChatHistory()" class="text-xs text-slate-500 hover:text-slate-800 px-2 py-1 rounded hover:bg-slate-200/70 transition-colors">
             清空对话
+          </button>
+        </div>
+      </div>
+
+      <!-- 主动关怀提醒横幅 (Proactive Mentor Banner) -->
+      <div id="proactiveBanner" class="hidden px-5 py-3 bg-gradient-to-r from-violet-50 to-indigo-50 border-b border-indigo-100 flex items-start justify-between space-x-3 transition-all">
+        <div class="flex items-start space-x-2.5">
+          <i data-lucide="bell" class="w-5 h-5 text-violet-600 mt-0.5 shrink-0"></i>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span id="proactiveBannerTitle" class="text-xs font-bold text-violet-900">周五技术复盘与周末充电关怀</span>
+              <span class="text-[10px] px-1.5 py-0.2 rounded bg-violet-200/70 text-violet-800">主动触达</span>
+            </div>
+            <p id="proactiveBannerContent" class="text-xs text-slate-700 mt-0.5 leading-relaxed"></p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2 shrink-0">
+          <button id="proactiveReplyBtn" class="px-2.5 py-1 text-xs font-medium text-white bg-violet-600 hover:bg-violet-700 rounded-lg shadow-sm transition-colors">
+            一键回复
+          </button>
+          <button id="proactiveDismissBtn" class="text-slate-400 hover:text-slate-600 p-1">
+            <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
@@ -422,13 +480,128 @@
       return document.getElementById('userIdInput').value.trim() || 'mazikang';
     }
 
+    // 主动关怀与防打扰中枢交互逻辑
+    async function fetchProactiveStatus() {
+      const userId = getCurrentUserId();
+      try {
+        const resp = await fetch(`/api/v1/proactive/status?user_id=${userId}`);
+        const data = await resp.json();
+        
+        const quietText = document.getElementById('proactiveQuietHoursText');
+        const contactText = document.getElementById('proactiveCanContactText');
+        const badge = document.getElementById('proactiveStatusBadge');
+
+        if (data.is_quiet_hours) {
+          quietText.innerText = `${data.quiet_hours_range} (夜间静默中)`;
+          contactText.innerText = '🌙 静默免扰中';
+          contactText.className = 'font-medium text-amber-600';
+          badge.innerText = '静默保护';
+          badge.className = 'text-[10px] px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200';
+        } else {
+          quietText.innerText = data.quiet_hours_range;
+          if (data.can_contact) {
+            contactText.innerText = '☀️ 允许主动触达';
+            contactText.className = 'font-medium text-emerald-600';
+            badge.innerText = '防扰守卫就绪';
+            badge.className = 'text-[10px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200';
+          } else {
+            contactText.innerText = '⏳ 冷却中 (防高频)';
+            contactText.className = 'font-medium text-slate-500';
+            badge.innerText = '冷却保护';
+            badge.className = 'text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200';
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to fetch proactive status:', e);
+      }
+    }
+
+    async function fetchProactiveMessages() {
+      const userId = getCurrentUserId();
+      try {
+        const resp = await fetch(`/api/v1/proactive/messages?user_id=${userId}&unread_only=true`);
+        const data = await resp.json();
+        const banner = document.getElementById('proactiveBanner');
+        if (data.messages && data.messages.length > 0) {
+          const latest = data.messages[0];
+          document.getElementById('proactiveBannerTitle').innerText = latest.title;
+          document.getElementById('proactiveBannerContent').innerText = latest.content;
+          
+          const replyBtn = document.getElementById('proactiveReplyBtn');
+          replyBtn.onclick = () => {
+            fillPrompt(`导师，针对你刚才提到的【${latest.title}】，我的想法是：`);
+            handleAckProactive(latest.id, 'read');
+          };
+
+          const dismissBtn = document.getElementById('proactiveDismissBtn');
+          dismissBtn.onclick = () => {
+            handleAckProactive(latest.id, 'dismiss');
+          };
+
+          banner.classList.remove('hidden');
+          lucide.createIcons();
+        } else {
+          banner.classList.add('hidden');
+        }
+      } catch (e) {
+        console.warn('Failed to fetch proactive messages:', e);
+      }
+    }
+
+    async function handleTriggerProactive(type) {
+      const userId = getCurrentUserId();
+      const indicator = document.getElementById('thinkingIndicator');
+      indicator.classList.remove('hidden');
+      try {
+        const resp = await fetch('/api/v1/proactive/trigger', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: userId,
+            trigger_type: type,
+            force: true // 演示体验模式强制穿透
+          })
+        });
+        const res = await resp.json();
+        if (res.status === 'triggered') {
+          await fetchProactiveMessages();
+          await fetchProactiveStatus();
+          // 同时在主聊天界面插入一条导师主动问候
+          const msg = res.proactive_message;
+          appendMessage('assistant', `🔔 **【导师主动触达 · ${msg.title}】**\n\n${msg.content}`);
+        } else {
+          alert('主动决策跳过：' + res.message);
+        }
+      } catch (e) {
+        alert('触发失败：' + e.message);
+      } finally {
+        indicator.classList.add('hidden');
+      }
+    }
+
+    async function handleAckProactive(msgId, action) {
+      const userId = getCurrentUserId();
+      try {
+        await fetch('/api/v1/proactive/ack', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, message_id: msgId, action })
+        });
+        document.getElementById('proactiveBanner').classList.add('hidden');
+        await fetchProactiveStatus();
+      } catch (e) {
+        console.warn('Ack failed:', e);
+      }
+    }
+
     // 刷新技术画像与导师拟人化状态
     async function refreshUserProfile() {
       const userId = getCurrentUserId();
       console.log('Syncing LTM profile for:', userId);
-      // 可扩展：调用接口拉取 LTM 最新画像，此处模拟平滑刷新
       const badge = document.getElementById('intimacyBadge');
       badge.textContent = '熟络伙伴 · 深度信任';
+      await fetchProactiveStatus();
+      await fetchProactiveMessages();
       lucide.createIcons();
     }
 
@@ -615,6 +788,12 @@
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
     }
+
+    // 页面初次加载时拉取防打扰状态与主动关怀消息
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchProactiveStatus();
+      fetchProactiveMessages();
+    });
   </script>
 </body>
 </html>

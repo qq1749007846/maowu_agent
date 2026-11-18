@@ -14,7 +14,7 @@ tracemalloc.start()
 
 @pytest.fixture
 def mock_langfuse():
-    lf = Mock(spec=Langfuse)
+    lf = Mock()
     span = Mock(trace_id="test_trace_id")
     span.__enter__ = Mock(return_value=span)
     span.__exit__ = Mock(return_value=None)

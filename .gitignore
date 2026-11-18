@@ -14,3 +14,6 @@ wheels/
 
 # AstrBot persistent data
 astrbot_data/
+
+# Local databases
+*.db

@@ -21,7 +21,10 @@ class DeepResearcherAgent:
     """
 
     def __init__(self) -> None:
-        self.llm = ChatOpenAI(
+        pass
+
+    def _get_llm(self) -> ChatOpenAI:
+        return ChatOpenAI(
             model=os.getenv("DEFAULT_MODEL", "openai/deepseek-v4-pro").split("/")[-1],
             api_key=os.getenv("OPENAI_API_KEY", ""),
             base_url=os.getenv("OPENAI_API_BASE", "https://model-api.datagrand.com/v1"),
@@ -47,12 +50,13 @@ class DeepResearcherAgent:
             "2. 【主流技术/架构选型横向对比矩阵】（包含优缺点、性能体感、维护成本与踩坑风险）\n"
             "3. 【针对业务系统的推荐落地策略与迁移路径】\n"
             "4. 【潜在陷阱与最佳实践踩坑防护指引】\n"
-            "风格务实硬核，注重原理与真实生产场景，拒绝套话。"
+            "风格务实硬核，注重原理与真实生产场景，拒绝套话，字数精炼控制在 400 字以内。"
         )
 
         user_content = f"调研主题：{topic}\n攻坚侧重点：{focus}\n当前业务系统架构背景：{system_context}"
 
-        response = await self.llm.ainvoke([
+        llm = self._get_llm()
+        response = await llm.ainvoke([
             SystemMessage(content=system_prompt),
             HumanMessage(content=user_content),
         ])

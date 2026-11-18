@@ -12,10 +12,17 @@ from prometheus_fastapi_instrumentator import Instrumentator as PrometheusInstru
 
 from app.container import Container
 from app.http.middleware.cors_middleware import CORSConfig, setup_cors_middleware
+from app.proactive import proactive_scheduler
 from app.subagents import dispatcher, init_subagents
 from app.utils.utils import is_valid_uuid4
 
-from ..http.routes import astrbot_router, health_router, runs_router, thread_router
+from ..http.routes import (
+    astrbot_router,
+    health_router,
+    proactive_router,
+    runs_router,
+    thread_router,
+)
 from .agent_registry import register_agents
 from .config import AppConfig
 
@@ -27,8 +34,11 @@ async def lifespan(app: FastAPI):
     # 启动异步子代理事件循环
     init_subagents(dispatcher)
     await dispatcher.start()
+    # 启动主动交互事件调度器
+    await proactive_scheduler.start()
     yield
     # 优雅关闭调度器
+    await proactive_scheduler.stop()
     await dispatcher.stop()
 
 
@@ -68,6 +78,9 @@ def create_app(config: AppConfig) -> FastAPI:
 
     # 挂载 AstrBot 与子代理路由（支持标准 OpenAI /v1/chat/completions 及 /api/v1/subagents/tasks）
     app.include_router(astrbot_router)
+
+    # 挂载主动关怀与复盘调度路由
+    app.include_router(proactive_router)
 
     # 挂载静态资源与根路径前端交互页面
     if STATIC_DIR.exists():

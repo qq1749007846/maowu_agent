@@ -101,6 +101,14 @@ class LTMService:
             )
             conn.commit()
 
+    def list_all_profiles(self) -> list[UserProfile]:
+        """获取所有已持久化的用户画像"""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT profile_json FROM user_profiles")
+            rows = cursor.fetchall()
+            return [UserProfile.model_validate_json(row["profile_json"]) for row in rows]
+
     # --- 排障踩坑情节记忆管理 ---
     def add_episodic_memory(self, memory: EpisodicMemory) -> None:
         """保存一条排障踩坑或关键成长记忆"""

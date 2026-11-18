@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from typing import Any
 
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -25,7 +26,9 @@ class BackgroundReflectorAgent:
 
     def __init__(self, ltm_service: LTMService | None = None) -> None:
         self.ltm_service = ltm_service or LTMService()
-        self.llm = ChatOpenAI(
+
+    def _get_llm(self) -> ChatOpenAI:
+        return ChatOpenAI(
             model=os.getenv("DEFAULT_MODEL", "openai/deepseek-v4-pro").split("/")[-1],
             api_key=os.getenv("OPENAI_API_KEY", ""),
             base_url=os.getenv("OPENAI_API_BASE", "https://model-api.datagrand.com/v1"),
@@ -63,23 +66,23 @@ class BackgroundReflectorAgent:
             "若无明显技术经验沉淀，则设置 has_valuable_memory 为 false。"
         )
 
-        response = await self.llm.ainvoke([
+        llm = self._get_llm()
+        response = await llm.ainvoke([
             SystemMessage(content=system_prompt),
             HumanMessage(content=f"对话内容如下：\n{conversation}"),
         ])
 
         raw_content = str(response.content).strip()
-        # 清理可能存在的 ```json 标记
-        if raw_content.startswith("```json"):
-            raw_content = raw_content[7:]
-        if raw_content.startswith("```"):
-            raw_content = raw_content[3:]
-        if raw_content.endswith("```"):
-            raw_content = raw_content[:-3]
-        raw_content = raw_content.strip()
+        # 鲁棒提取 JSON 块（支持带有 <think> 标签或前缀叙述的 reasoning 输出）
+        json_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw_content, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(1).strip()
+        else:
+            brace_match = re.search(r"(\{.*\})", raw_content, re.DOTALL)
+            json_str = brace_match.group(1).strip() if brace_match else raw_content.strip()
 
         try:
-            data = json.loads(raw_content)
+            data = json.loads(json_str)
         except Exception as exc:
             logger.warning(f"Failed to parse LLM reflection output: {exc}. Content: {raw_content[:100]}")
             return {"status": "parse_error", "raw": raw_content}
