@@ -213,3 +213,30 @@ flowchart LR
 - **状态持久化隔离**：会话级（Thread Checkpoint）与用户全局级（User LTM）严格分离，保障并发安全与跨 Session 数据一致性。
 - **可观测性与评测闭环（Observability & Evals）**：规范记录每一轮调用的 Token 消耗、耗时分布、工具调用轨迹，为后续构建回归评估测试集（Evals Harness）提供数据支撑。
 
+
+### 5.5 测试工程规范与测试报告存档准则 (Testing & Report Archiving Practice)
+为保障系统的可回滚性（Rollback Readiness）、质量可见度与长期工程演进稳定性，所有测试与验证操作严格遵循以下规范：
+
+```text
+tests/
+├── test_*.py                          # 单元测试与端到端集成测试脚本（存放于 tests/ 根目录或对应子模块）
+└── test_page/                         # 测试报告专属归档目录
+    ├── test_report_<YYYYMMDD_HHMMSS>.html  # 独立可视化 HTML 报告（Self-contained，含耗时与通过状态）
+    └── test_report_<YYYYMMDD_HHMMSS>.md    # 结构化 Markdown 评估归档摘要
+```
+
+1. **测试脚本存放规范（Tests Directory Layout）**：
+   - 所有的功能性单元测试、子代理验证脚本与 LangGraph 图状态机测试脚本必须统一维护在项目根目录的 `tests/` 文件夹内；
+   - 严禁在临时文件或未纳入版本控制的目录中编写一次性测试脚本；所有脚本必须支持通过 `pytest` 自动化批处理运行，便于任何阶段的代码回滚和回归验证。
+2. **测试报告生成与命名规范（Report Naming Convention）**：
+   - 阶段验收与集成测试报告统一输出至 `tests/test_page/` 目录；
+   - 报告文件名必须强制包含执行完成时的时间戳，命名模板格式为：
+     - HTML 报告：`tests/test_page/test_report_<YYYYMMDD_HHMMSS>.html`（采用 `--self-contained-html` 生成单文件，方便随时本地双击查阅）；
+     - 归档摘要：`tests/test_page/test_report_<YYYYMMDD_HHMMSS>.md`。
+3. **自动化生成标准命令（Execution Standard）**：
+   - 生成带时间戳报告的标准执行指令：
+     ```powershell
+     $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+     .\.venv\Scripts\python.exe -m pytest tests/ --html="tests/test_page/test_report_$timestamp.html" --self-contained-html -v
+     ```
+   - 任何破坏性重构或阶段功能交付前，必须先在 `tests/test_page/` 生成验收测试报告后再行提交与发版。
