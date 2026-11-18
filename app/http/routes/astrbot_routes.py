@@ -6,12 +6,13 @@ import time
 from typing import Any, AsyncGenerator
 from uuid import uuid4
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, BackgroundTasks, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.container import Container
 from app.models import Thread, User
+from app.subagents import dispatcher
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,13 @@ class OpenAIChatRequest(BaseModel):
     messages: list[OpenAIMessage]
     stream: bool = False
     user: str | None = None
+
+
+class SubAgentTaskSubmitRequest(BaseModel):
+    """提交异步子代理任务（如深度架构调研）"""
+    task_type: str = Field(default="deep_research", description="任务类型：deep_research / memory_consolidation")
+    user_id: str = Field(default="default_user", description="用户ID")
+    payload: dict[str, Any] = Field(default_factory=dict, description="任务参数")
 
 
 async def _run_maowu_agent(user_id: str, prompt: str, thread_id: str | None = None) -> AsyncGenerator[str, None]:
@@ -68,12 +76,12 @@ async def _run_maowu_agent(user_id: str, prompt: str, thread_id: str | None = No
 # 1. 标准 OpenAI 兼容端点（AstrBot 在 WebUI 无插件直接填入）
 # ========================================================
 @astrbot_router.post("/v1/chat/completions")
-async def openai_chat_completions(req: OpenAIChatRequest) -> Any:
+async def openai_chat_completions(req: OpenAIChatRequest, background_tasks: BackgroundTasks) -> Any:
     """
     提供标准 OpenAI 格式的 /v1/chat/completions 端点
     AstrBot 的 LLM 提供商选择 OpenAI 兼容协议，填入 http://localhost:8000/v1 即可直连！
+    并在对话完成后自动派发异步记忆沉淀子代理。
     """
-    # 提取用户最新提问
     last_user_msg = ""
     for msg in reversed(req.messages):
         if msg.role == "user" and msg.content.strip():
@@ -90,7 +98,9 @@ async def openai_chat_completions(req: OpenAIChatRequest) -> Any:
     # 流式输出
     if req.stream:
         async def stream_generator():
+            collected_tokens = []
             async for token in _run_maowu_agent(user_id=user_id, prompt=last_user_msg):
+                collected_tokens.append(token)
                 chunk = {
                     "id": completion_id,
                     "object": "chat.completion.chunk",
@@ -117,6 +127,10 @@ async def openai_chat_completions(req: OpenAIChatRequest) -> Any:
             yield f"data: {json.dumps(done_chunk, ensure_ascii=False)}\n\n"
             yield "data: [DONE]\n\n"
 
+            # 异步触发反思子代理
+            full_conv = f"用户: {last_user_msg}\n导师: {''.join(collected_tokens)}"
+            await dispatcher.submit_task("memory_consolidation", user_id, {"conversation": full_conv})
+
         return StreamingResponse(stream_generator(), media_type="text/event-stream")
 
     # 非流式输出
@@ -125,6 +139,15 @@ async def openai_chat_completions(req: OpenAIChatRequest) -> Any:
         full_tokens.append(token)
 
     reply_content = "".join(full_tokens).strip()
+
+    # 异步触发反思子代理
+    full_conv = f"用户: {last_user_msg}\n导师: {reply_content}"
+    background_tasks.add_task(
+        dispatcher.submit_task,
+        "memory_consolidation",
+        user_id,
+        {"conversation": full_conv},
+    )
 
     return {
         "id": completion_id,
@@ -150,14 +173,61 @@ async def openai_chat_completions(req: OpenAIChatRequest) -> Any:
 # 2. 专属简洁端点（适合 AstrBot 插件或 Webhook 自定义调用）
 # ========================================================
 @astrbot_router.post("/api/v1/astrbot/chat")
-async def astrbot_simple_chat(req: AstrBotChatRequest) -> dict[str, Any]:
-    """专属快捷接口：传入 user_id 与 message，返回技术导师思考后的回答"""
+async def astrbot_simple_chat(req: AstrBotChatRequest, background_tasks: BackgroundTasks) -> dict[str, Any]:
+    """专属快捷接口：传入 user_id 与 message，返回技术导师思考后的回答，并异步沉淀记忆"""
     full_tokens: list[str] = []
     async for token in _run_maowu_agent(user_id=req.user_id, prompt=req.message, thread_id=req.thread_id):
         full_tokens.append(token)
 
+    reply = "".join(full_tokens).strip()
+
+    # 异步沉淀记忆
+    full_conv = f"用户: {req.message}\n导师: {reply}"
+    background_tasks.add_task(
+        dispatcher.submit_task,
+        "memory_consolidation",
+        req.user_id,
+        {"conversation": full_conv},
+    )
+
     return {
         "status": "success",
         "user_id": req.user_id,
-        "reply": "".join(full_tokens).strip(),
+        "reply": reply,
+    }
+
+
+# ========================================================
+# 3. 异步子代理任务管理接口（工单派发与状态查询）
+# ========================================================
+@astrbot_router.post("/api/v1/subagents/tasks")
+async def submit_subagent_task(req: SubAgentTaskSubmitRequest) -> dict[str, Any]:
+    """派发耗时异步任务（如 deep_research 深度技术调研）"""
+    ticket = await dispatcher.submit_task(req.task_type, req.user_id, req.payload)
+    return {
+        "status": "accepted",
+        "task_id": ticket.task_id,
+        "task_type": ticket.task_type,
+        "user_id": ticket.user_id,
+        "task_status": ticket.status.value,
+        "created_at": ticket.created_at.isoformat(),
+    }
+
+
+@astrbot_router.get("/api/v1/subagents/tasks/{task_id}")
+async def get_subagent_task(task_id: str) -> dict[str, Any]:
+    """查询异步子代理任务的执行进度与调研报告结果"""
+    ticket = dispatcher.get_task(task_id)
+    if not ticket:
+        return {"status": "not_found", "task_id": task_id}
+
+    return {
+        "task_id": ticket.task_id,
+        "task_type": ticket.task_type,
+        "user_id": ticket.user_id,
+        "task_status": ticket.status.value,
+        "result": ticket.result,
+        "error": ticket.error,
+        "created_at": ticket.created_at.isoformat(),
+        "completed_at": ticket.completed_at.isoformat() if ticket.completed_at else None,
     }

@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from uuid import uuid4
 
 from asgi_correlation_id import CorrelationIdMiddleware
@@ -8,11 +9,22 @@ from prometheus_fastapi_instrumentator import Instrumentator as PrometheusInstru
 
 from app.container import Container
 from app.http.middleware.cors_middleware import CORSConfig, setup_cors_middleware
+from app.subagents import dispatcher, init_subagents
 from app.utils.utils import is_valid_uuid4
 
 from ..http.routes import astrbot_router, health_router, runs_router, thread_router
 from .agent_registry import register_agents
 from .config import AppConfig
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 启动异步子代理事件循环
+    init_subagents(dispatcher)
+    await dispatcher.start()
+    yield
+    # 优雅关闭调度器
+    await dispatcher.stop()
 
 
 def create_app(config: AppConfig) -> FastAPI:
@@ -21,9 +33,10 @@ def create_app(config: AppConfig) -> FastAPI:
 
     app = FastAPI(
         title="MaoWu Agent",
-        description="Tech & Career Growth Mentor Agent Runtime with AstrBot integration",
-        version="0.1.0",
+        description="Tech & Career Growth Mentor Agent Runtime with Sub-Agents & AstrBot integration",
+        version="0.2.0",
         debug=config.debug,
+        lifespan=lifespan,
     )
 
     cors_config = CORSConfig(
@@ -48,7 +61,7 @@ def create_app(config: AppConfig) -> FastAPI:
     app.include_router(thread_router, prefix="/api/v1")
     app.include_router(health_router, prefix="/api/v1")
 
-    # 挂载 AstrBot 适配路由（支持标准 OpenAI /v1/chat/completions 及 /api/v1/astrbot/chat）
+    # 挂载 AstrBot 与子代理路由（支持标准 OpenAI /v1/chat/completions 及 /api/v1/subagents/tasks）
     app.include_router(astrbot_router)
 
     # FastAPIInstrumentor.instrument_app(app, excluded_urls="/api/v1/health*,/docs,/metrics,/openapi.json")
