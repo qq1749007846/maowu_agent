@@ -27,14 +27,33 @@ class AstrBotChatRequest(BaseModel):
 
 
 class OpenAIMessage(BaseModel):
-    role: str
-    content: str
+    model_config = {"extra": "allow"}
+    role: str = "user"
+    content: Any = ""
+
+
+def _extract_content(content: Any) -> str:
+    """安全解析不同格式的 message content（支持纯文本、多模态数组等）"""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for item in content:
+            if isinstance(item, dict) and "text" in item:
+                parts.append(str(item["text"]))
+            elif isinstance(item, str):
+                parts.append(item)
+        return " ".join(parts)
+    if content is None:
+        return ""
+    return str(content)
 
 
 class OpenAIChatRequest(BaseModel):
     """标准 OpenAI ChatCompletions 兼容请求（AstrBot 原生支持）"""
+    model_config = {"extra": "allow"}
     model: str = "deepseek-v4-pro"
-    messages: list[OpenAIMessage]
+    messages: list[OpenAIMessage] = Field(default_factory=list)
     stream: bool = False
     user: str | None = None
 
@@ -75,17 +94,49 @@ async def _run_maowu_agent(user_id: str, prompt: str, thread_id: str | None = No
 # ========================================================
 # 1. 标准 OpenAI 兼容端点（AstrBot 在 WebUI 无插件直接填入）
 # ========================================================
+@astrbot_router.get("/v1/models")
+@astrbot_router.get("/models")
+async def list_models() -> dict[str, Any]:
+    """返回标准 OpenAI 格式的模型列表，供 AstrBot 等客户端探活与拉取模型"""
+    now = int(time.time())
+    return {
+        "object": "list",
+        "data": [
+            {
+                "id": "deepseek-v4-pro",
+                "object": "model",
+                "created": now,
+                "owned_by": "datagrand",
+            },
+            {
+                "id": "maowu-agent",
+                "object": "model",
+                "created": now,
+                "owned_by": "maowu",
+            },
+            {
+                "id": "openai/deepseek-v4-pro",
+                "object": "model",
+                "created": now,
+                "owned_by": "datagrand",
+            },
+        ],
+    }
+
+
 @astrbot_router.post("/v1/chat/completions")
+@astrbot_router.post("/chat/completions")
 async def openai_chat_completions(req: OpenAIChatRequest, background_tasks: BackgroundTasks) -> Any:
     """
     提供标准 OpenAI 格式的 /v1/chat/completions 端点
-    AstrBot 的 LLM 提供商选择 OpenAI 兼容协议，填入 http://localhost:8000/v1 即可直连！
+    AstrBot 的 LLM 提供商选择 OpenAI 兼容协议，填入 http://maowu-agent:8000/v1 即可直连！
     并在对话完成后自动派发异步记忆沉淀子代理。
     """
     last_user_msg = ""
     for msg in reversed(req.messages):
-        if msg.role == "user" and msg.content.strip():
-            last_user_msg = msg.content.strip()
+        extracted = _extract_content(msg.content).strip()
+        if msg.role == "user" and extracted:
+            last_user_msg = extracted
             break
 
     if not last_user_msg:
