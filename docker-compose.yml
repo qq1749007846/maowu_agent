@@ -1,5 +1,5 @@
 services:
-  # MaoWu Agent 核心认知与记忆引擎
+  # MaoWu Agent 核心智能体与工作记忆引擎
   maowu-agent:
     build:
       context: .
@@ -14,19 +14,23 @@ services:
     environment:
       - HOST=0.0.0.0
       - PORT=8000
+      - OPENAI_API_BASE=https://model-api.datagrand.com/v1
+      - DEFAULT_MODEL=openai/deepseek-v4-pro
     volumes:
-      # 持久化长期记忆库 (ltm.db) 和 自定义提示词
+      # 持久化长期记忆库 (data/ltm.db) 与提示词配置
       - ./data:/app/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
-      interval: 30s
+      interval: 15s
       timeout: 5s
       retries: 3
       start_period: 10s
+    networks:
+      - maowu_net
 
-  # AstrBot 可视化面板与 QQ 协议网关
+  # AstrBot 可视化面板与多平台机器人网关
   astrbot:
-    image: m.daocloud.io/docker.io/soulter/astrbot:latest
+    image: docker.m.daocloud.io/soulter/astrbot:latest
     container_name: astrbot
     restart: always
     ports:
@@ -34,8 +38,14 @@ services:
     environment:
       - TZ=Asia/Shanghai
     volumes:
-      # 持久化 AstrBot QQ 登录凭据与客户端配置
+      # 持久化 AstrBot 配置文件与登录凭据
       - ./astrbot_data:/AstrBot/data
     depends_on:
       maowu-agent:
         condition: service_healthy
+    networks:
+      - maowu_net
+
+networks:
+  maowu_net:
+    driver: bridge
