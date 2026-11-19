@@ -1,7 +1,7 @@
 # ==========================================
-# MaoWu Agent 生产级 Docker 镜像（全链路国内镜像源极速构建）
+# MaoWu Agent 生产级 Docker 镜像（支持宿主机内网镜像与国内 pip 加速）
 # ==========================================
-FROM docker.m.daocloud.io/library/python:3.12-slim
+FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \

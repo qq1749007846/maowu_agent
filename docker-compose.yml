@@ -30,7 +30,7 @@ services:
 
   # AstrBot 可视化面板与多平台机器人网关
   astrbot:
-    image: docker.m.daocloud.io/soulter/astrbot:latest
+    image: soulter/astrbot:latest
     container_name: astrbot
     restart: always
     ports:
