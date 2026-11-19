@@ -18,6 +18,7 @@ from app.utils.utils import is_valid_uuid4
 
 from ..http.routes import (
     astrbot_router,
+    db_router,
     health_router,
     proactive_router,
     runs_router,
@@ -81,6 +82,9 @@ def create_app(config: AppConfig) -> FastAPI:
 
     # 挂载主动关怀与复盘调度路由
     app.include_router(proactive_router)
+
+    # 挂载 MySQL 简历数据库路由
+    app.include_router(db_router)
 
     # 挂载静态资源与根路径前端交互页面
     if STATIC_DIR.exists():

@@ -1,4 +1,5 @@
 from .astrbot_routes import astrbot_router
+from .db_routes import db_router
 from .health_routes import health_router
 from .proactive_routes import proactive_router
 from .runs_routes import runs_router
@@ -10,4 +11,5 @@ __all__ = [
     "health_router",
     "astrbot_router",
     "proactive_router",
+    "db_router",
 ]
