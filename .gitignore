@@ -17,3 +17,8 @@ astrbot_data/
 
 # Local databases
 *.db
+
+# Workspace data
+data/workspace/*
+!data/workspace/.gitkeep
+

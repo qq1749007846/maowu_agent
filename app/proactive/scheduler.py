@@ -136,14 +136,25 @@ class ProactiveScheduler:
         elif trigger_type == "blocker_followup":
             decision = await self.decider.evaluate_blocker_followup(user_id)
             topic_title = "近期排障卡点与稳定性回访"
+        elif trigger_type == "morning_tasks":
+            decision = await self.decider.evaluate_morning_tasks(user_id)
+            topic_title = "猫老晨间脉案与待办催办"
         else:
             # 自动探测策略：
-            # 如果是周五且当前时间大于 15:00，优先发起周度技术复盘
-            if now.weekday() == 4 and now.hour >= 15:
+            # 1. 如果是早晨（8:00 - 12:00），优先探测是否有未结清的待办任务催办
+            if 8 <= now.hour < 12 and now.weekday() < 5:
+                morning_decision = await self.decider.evaluate_morning_tasks(user_id)
+                if morning_decision and morning_decision.should_trigger and morning_decision.score >= 6.0:
+                    decision = morning_decision
+                    topic_title = "猫老晨间脉案与待办催办"
+
+            # 2. 如果是周五且当前时间大于 15:00，发起周度技术复盘
+            if not decision and now.weekday() == 4 and now.hour >= 15:
                 decision = await self.decider.evaluate_weekly_review(user_id)
                 topic_title = "周五技术复盘与周末充电关怀"
-            else:
-                # 否则优先探测是否有未关闭或近期的排障阻塞
+
+            # 3. 否则探测是否有未关闭或近期的排障阻塞
+            if not decision:
                 decision = await self.decider.evaluate_blocker_followup(user_id)
                 topic_title = "近期排障卡点与稳定性回访"
 

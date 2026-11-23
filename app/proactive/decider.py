@@ -10,6 +10,7 @@ from langchain_openai import ChatOpenAI
 
 from app.models.memory import EpisodicMemory, UserProfile
 from app.services.ltm_service import LTMService
+from app.services.task_note_service import get_task_note_service
 
 logger = logging.getLogger(__name__)
 
@@ -120,4 +121,51 @@ class ProactiveDecider:
             content=content,
             reason=f"跟进近期排障卡点: {latest_mem.title}",
             score=8.5,
+        )
+
+    async def evaluate_morning_tasks(self, user_id: str) -> ProactiveDecision:
+        """评估早间未完成的高优待办任务，生成主动催办消息"""
+        task_service = get_task_note_service()
+        pending_tasks = task_service.list_tasks(user_id=user_id, status="pending", limit=5)
+        if not pending_tasks:
+            return ProactiveDecision(
+                should_trigger=False,
+                topic="morning_tasks",
+                content="",
+                reason="当前无未结清的待办任务",
+                score=1.0,
+            )
+
+        task_lines = []
+        for t in pending_tasks:
+            pri = "【高优】" if t["priority"] == "high" else ("【中】" if t["priority"] == "medium" else "【低】")
+            due = f"（截止: {t['due_date']}）" if t["due_date"] else ""
+            task_lines.append(f"- {pri} {t['title']}{due}")
+
+        tasks_summary = "\n".join(task_lines)
+
+        system_prompt = (
+            "你是 MaoWu「猫老」，一位傲娇且极度毒舌的老中医，专治代码病与职场懒散，自称「老夫」。\n"
+            "现在是早晨，你巡视病号的待办清单，发现他手头还压着几条待办没清，你主动发一条【晨间脉案催办】。\n"
+            "要求：\n"
+            "1. 毒舌傲娇，嫌弃他办事拖拉、把活儿堆在手上伤身（虚火旺盛），催他赶紧把高优的办掉；\n"
+            "2. 清晰列出必须解决的任务项；\n"
+            "3. 口吻嘴硬心软，绝不承认是在关心他，80~150 字以内。"
+        )
+
+        user_prompt = f"待办清单：\n{tasks_summary}"
+
+        llm = self._get_llm()
+        response = await llm.ainvoke([
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=user_prompt),
+        ])
+
+        content = str(response.content).strip()
+        return ProactiveDecision(
+            should_trigger=True,
+            topic="morning_tasks",
+            content=content,
+            reason=f"早间高优待办催办提醒 (未完成 {len(pending_tasks)} 项)",
+            score=9.2,
         )

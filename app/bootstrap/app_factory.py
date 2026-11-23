@@ -22,6 +22,7 @@ from ..http.routes import (
     health_router,
     proactive_router,
     runs_router,
+    task_note_router,
     thread_router,
     workspace_router,
 )
@@ -89,6 +90,9 @@ def create_app(config: AppConfig) -> FastAPI:
 
     # 挂载私人工作区文件下载与管理路由
     app.include_router(workspace_router)
+
+    # 挂载私人待办事项 (TODO) 与备忘录路由
+    app.include_router(task_note_router)
 
     # 挂载静态资源与根路径前端交互页面
     if STATIC_DIR.exists():
