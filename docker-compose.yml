@@ -16,8 +16,9 @@ services:
     environment:
       - HOST=0.0.0.0
       - PORT=8000
-      - OPENAI_API_BASE=https://model-api.datagrand.com/v1
-      - DEFAULT_MODEL=openai/deepseek-v4-pro
+      - OPENAI_API_BASE=${OPENAI_API_BASE:-http://124.222.9.212:8787/v1}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-sk-eQ9R1DO5bUX9UUJ7keGOpXXa1nuVsOVe}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-openai/deepseek-v4.1-flash}
       - MYSQL_HOST=${MYSQL_HOST:-host.docker.internal}
       - MYSQL_PORT=${MYSQL_PORT:-3306}
       - MYSQL_USER=${MYSQL_USER:-root}

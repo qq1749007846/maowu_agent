@@ -38,7 +38,7 @@
             </span>
             <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center space-x-1">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>DeepSeek-V4-Pro 就绪</span>
+              <span>DeepSeek-V4.1-Flash 就绪</span>
             </span>
           </div>
           <p class="text-xs text-slate-500">拟人化伴随式智能体 · 长期记忆 · 工作记忆装配 · 异步子代理矩阵</p>
@@ -631,7 +631,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: 'deepseek-v4-pro',
+            model: 'deepseek-v4.1-flash',
             messages: [{ role: 'user', content: query }],
             stream: true,
             user: userId

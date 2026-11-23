@@ -52,7 +52,7 @@ def _extract_content(content: Any) -> str:
 class OpenAIChatRequest(BaseModel):
     """标准 OpenAI ChatCompletions 兼容请求（AstrBot 原生支持）"""
     model_config = {"extra": "allow"}
-    model: str = "deepseek-v4-pro"
+    model: str = "deepseek-v4.1-flash"
     messages: list[OpenAIMessage] = Field(default_factory=list)
     stream: bool = False
     user: str | None = None
@@ -103,10 +103,16 @@ async def list_models() -> dict[str, Any]:
         "object": "list",
         "data": [
             {
+                "id": "deepseek-v4.1-flash",
+                "object": "model",
+                "created": now,
+                "owned_by": "codebuddy",
+            },
+            {
                 "id": "deepseek-v4-pro",
                 "object": "model",
                 "created": now,
-                "owned_by": "datagrand",
+                "owned_by": "codebuddy",
             },
             {
                 "id": "maowu-agent",
@@ -115,10 +121,10 @@ async def list_models() -> dict[str, Any]:
                 "owned_by": "maowu",
             },
             {
-                "id": "openai/deepseek-v4-pro",
+                "id": "openai/deepseek-v4.1-flash",
                 "object": "model",
                 "created": now,
-                "owned_by": "datagrand",
+                "owned_by": "codebuddy",
             },
         ],
     }
