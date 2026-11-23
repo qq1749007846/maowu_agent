@@ -42,6 +42,11 @@ class CodeRunnerService:
     def _resolve_safe_path(self, relative_path: str) -> Path:
         """解析并确保路径严格限制在 data/workspace/ 沙箱工作区内，防御路径遍历"""
         clean_name = relative_path.strip().lstrip("/\\")
+        # 兼容处理直接传入带有工作区前缀的路径（如 "data/workspace/foo.txt"）
+        normalized = clean_name.replace("\\", "/")
+        if normalized.startswith("data/workspace/"):
+            clean_name = normalized[len("data/workspace/"):]
+
         target_path = (self.workspace_dir / clean_name).resolve()
         try:
             target_path.relative_to(self.workspace_dir)
