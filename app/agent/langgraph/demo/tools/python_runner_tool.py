@@ -33,7 +33,8 @@ class PythonRunnerTool(BaseTool):
             else:
                 output_parts.append("输出 (stdout): [代码无任何控制台输出]")
             if res["created_files"]:
-                output_parts.append(f"工作区新增文件: {', '.join(res['created_files'])}")
+                file_links = [f"- {fn} (下载直链: /api/v1/workspace/download/{fn})" for fn in res["created_files"]]
+                output_parts.append("工作区新增生成文件:\n" + "\n".join(file_links) + "\n[提示：已为每个文件提供直接下载链接，请在回复中直接附上可点击的 Markdown 下载链接供用户直接下载]")
         else:
             output_parts.append(f"【执行失败】(耗时 {res['duration']}s, 退出码 {res['exit_code']})")
             if res["stderr"]:

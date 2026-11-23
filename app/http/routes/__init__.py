@@ -4,6 +4,7 @@ from .health_routes import health_router
 from .proactive_routes import proactive_router
 from .runs_routes import runs_router
 from .thread_routes import thread_router
+from .workspace_routes import workspace_router
 
 __all__ = [
     "thread_router",
@@ -12,4 +13,5 @@ __all__ = [
     "astrbot_router",
     "proactive_router",
     "db_router",
+    "workspace_router",
 ]

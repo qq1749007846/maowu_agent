@@ -23,6 +23,7 @@ from ..http.routes import (
     proactive_router,
     runs_router,
     thread_router,
+    workspace_router,
 )
 from .agent_registry import register_agents
 from .config import AppConfig
@@ -85,6 +86,9 @@ def create_app(config: AppConfig) -> FastAPI:
 
     # 挂载 MySQL 简历数据库路由
     app.include_router(db_router)
+
+    # 挂载私人工作区文件下载与管理路由
+    app.include_router(workspace_router)
 
     # 挂载静态资源与根路径前端交互页面
     if STATIC_DIR.exists():
