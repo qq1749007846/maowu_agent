@@ -30,3 +30,15 @@ def test_index_page_rendered_successfully():
 
     # 4. 验证异步子代理监控
     assert "后台子代理任务监控" in html_content
+
+    # 5. 验证 Phase 1~3 新增多功能工作台 Tabs
+    assert "tabPanel-tasks" in html_content
+    assert "tabPanel-files" in html_content
+    assert "tabPanel-sentinel" in html_content
+    assert "tabPanel-cognitive" in html_content
+
+    # 6. 验证新功能指南章节
+    assert "Python 沙箱与实体 Excel 报表直接交付" in html_content
+    assert "待办事项 (TODO) 与备忘录持久化" in html_content
+    assert "网页干货萃取与目标变动盯盘哨兵" in html_content
+

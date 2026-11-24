@@ -20,7 +20,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900 min-h-screen flex flex-col font-sans">
 
-  <!-- 1. 顶部全局导航栏 (参考 FDE Header) -->
+  <!-- 1. 顶部全局导航栏 -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
     <div class="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <!-- 左侧：品牌 Logo 与定位 -->
@@ -40,13 +40,16 @@
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>DeepSeek-V4.1-Flash 就绪</span>
             </span>
+            <span class="hidden md:inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+              ⚡ 沙箱执行 · 待办备忘 · 网页哨兵
+            </span>
           </div>
           <p class="text-xs text-slate-500">拟人化伴随式智能体 · 长期记忆 · 工作记忆装配 · 异步子代理矩阵</p>
         </div>
       </div>
 
       <!-- 右侧：快捷操作区 -->
-      <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-2.5">
         <!-- 使用提示引导按钮 -->
         <button onclick="toggleModal('guideModal')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors">
           <i data-lucide="help-circle" class="w-4 h-4 text-blue-600"></i>
@@ -68,11 +71,11 @@
     </div>
   </header>
 
-  <!-- 2. 主体工作区容器 (三栏/多卡片布局) -->
+  <!-- 2. 主体工作区容器 (三栏布局) -->
   <main class="flex-1 max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
     <!-- 左侧侧边栏：技术画像与记忆雷达 (占据 3 列) -->
-    <aside class="lg:col-span-3 space-y-6">
+    <aside class="lg:col-span-3 space-y-5">
       
       <!-- 导师人设动态状态卡片 -->
       <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
@@ -82,26 +85,26 @@
             <h3 class="font-semibold text-slate-900 text-sm">导师当前拟人化状态</h3>
           </div>
           <span id="intimacyBadge" class="text-xs px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium border border-indigo-200">
-            熟悉阶梯
+            熟络伙伴 · 深度信任
           </span>
         </div>
         <div class="space-y-3 text-xs">
           <div>
             <div class="flex justify-between text-slate-500 mb-1">
               <span>默契羁绊积分</span>
-              <span id="intimacyScoreText" class="font-bold text-blue-600">45 / 100</span>
+              <span id="intimacyScoreText" class="font-bold text-blue-600">65 / 100</span>
             </div>
             <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-              <div id="intimacyProgressBar" class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full" style="width: 45%"></div>
+              <div id="intimacyProgressBar" class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full" style="width: 65%"></div>
             </div>
           </div>
           <div class="flex items-center justify-between py-1.5 px-2.5 rounded-lg bg-slate-50 border border-slate-100">
             <span class="text-slate-500">当前语气基调</span>
-            <span id="currentToneText" class="font-medium text-slate-800">沉稳务实 · 启发探究</span>
+            <span id="currentToneText" class="font-medium text-slate-800">傲娇毒舌 · 药到病除</span>
           </div>
           <div class="flex items-center justify-between py-1.5 px-2.5 rounded-lg bg-slate-50 border border-slate-100">
             <span class="text-slate-500">情绪感知</span>
-            <span id="detectedEmotionText" class="font-medium text-emerald-600">平和专注 (Calm)</span>
+            <span id="detectedEmotionText" class="font-medium text-emerald-600">犀利专注 (Focus)</span>
           </div>
         </div>
       </div>
@@ -131,6 +134,12 @@
           <div class="pt-1 flex flex-col space-y-1.5">
             <span class="text-slate-500 font-medium text-[11px]">手动体验主动意愿研判：</span>
             <div class="grid grid-cols-2 gap-1.5">
+              <button onclick="handleTriggerProactive('morning_tasks')" class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-center font-medium transition-colors">
+                ☀️ 晨会催办敲打
+              </button>
+              <button onclick="handleTriggerProactive('web_watcher')" class="p-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-center font-medium transition-colors">
+                🌐 哨兵情报巡检
+              </button>
               <button onclick="handleTriggerProactive('weekly_review')" class="p-1.5 rounded-lg bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200 text-center font-medium transition-colors">
                 📅 周五技术复盘
               </button>
@@ -160,31 +169,24 @@
             </div>
           </div>
           <div>
-            <span class="text-slate-400 block mb-1">主力语言 (Languages)</span>
-            <div id="primaryLangsContainer" class="flex flex-wrap gap-1.5">
-              <span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md border border-slate-200">Python</span>
-              <span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md border border-slate-200">TypeScript</span>
-            </div>
-          </div>
-          <div>
             <span class="text-slate-400 block mb-1">核心技术栈 (Tech Stack)</span>
             <div id="techStackContainer" class="flex flex-wrap gap-1.5">
+              <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200">Python 3.12</span>
               <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200">FastAPI</span>
               <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200">LangGraph</span>
               <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200">Docker</span>
-              <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200">Postgres</span>
             </div>
           </div>
           <div>
             <span class="text-slate-400 block mb-1">正在负责的核心系统</span>
             <div id="projectsContainer" class="p-2 rounded-lg bg-slate-50 border border-slate-100 text-slate-700 leading-relaxed">
-              MaoWu Agent (LangGraph + DeepSeek-V4-Pro)
+              MaoWu Agent (私人工作多智能体架构)
             </div>
           </div>
           <div>
             <span class="text-slate-400 block mb-1">近期技术成长目标 (OKR)</span>
             <div id="goalsContainer" class="p-2 rounded-lg bg-amber-50/60 border border-amber-200 text-amber-900 leading-relaxed">
-              🎯 攻关高可用企业级多Agent体系与状态机编排
+              🎯 打造极致低时延、具备执行双手与哨兵眼眸的个人 Agent
             </div>
           </div>
         </div>
@@ -193,26 +195,29 @@
       <!-- 快速推荐问题模板 (Prompt Cheatsheet) -->
       <div class="bg-gradient-to-br from-indigo-50/60 via-blue-50/40 to-slate-50 rounded-2xl border border-blue-100 p-4 shadow-sm text-xs">
         <h4 class="font-semibold text-slate-800 mb-2.5 flex items-center space-x-1.5">
-          <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500"></i>
-          <span>点击快速体验导师能力</span>
+          <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+          <span>新功能快捷体验指令</span>
         </h4>
-        <div class="space-y-2">
-          <button onclick="fillPrompt('我在跑MaoWu Agent的postgres存储时，驱动又报错找不到pq wrapper，给个排查思路？')" class="w-full text-left p-2 rounded-lg bg-white hover:bg-blue-50 hover:border-blue-200 border border-slate-200/80 transition-all text-slate-700">
-            💡 <span class="font-medium">排障联想：</span>Windows psycopg缺libpq排查
+        <div class="space-y-1.5">
+          <button onclick="fillPrompt('老夫，用 Python 分析一下昨天销售数据并生成一个带汇总的 Excel 表格给我下载')" class="w-full text-left p-2 rounded-lg bg-white hover:bg-blue-50 hover:border-blue-200 border border-slate-200/80 transition-all text-slate-700">
+            📊 <span class="font-medium text-blue-900">沙箱做表：</span>执行 Python 导出 Excel 并直链交付
           </button>
-          <button onclick="fillPrompt('导师，我们系统准备接入Redis集群，在连接池保活和连接泄露防护上有什么避坑经验？')" class="w-full text-left p-2 rounded-lg bg-white hover:bg-blue-50 hover:border-blue-200 border border-slate-200/80 transition-all text-slate-700">
-            🛠️ <span class="font-medium">架构探讨：</span>Redis 连接池与防泄露方案
+          <button onclick="fillPrompt('老夫，记一条高优先级待办：明天下午把架构评审材料发给老板，另外记个笔记：PostgreSQL 索引优化核心在于避免全表扫描')" class="w-full text-left p-2 rounded-lg bg-white hover:bg-blue-50 hover:border-blue-200 border border-slate-200/80 transition-all text-slate-700">
+            📌 <span class="font-medium text-indigo-900">事务管理：</span>随口记高优待办与技术笔记
           </button>
-          <button onclick="fillPrompt('最近在做长连接流式网关，技术调研帮我对比一下FastAPI和Go Gin在高并发下的表现？')" class="w-full text-left p-2 rounded-lg bg-white hover:bg-blue-50 hover:border-blue-200 border border-slate-200/80 transition-all text-slate-700">
-            📊 <span class="font-medium">技术选型：</span>FastAPI vs Go Gin 深度对比
+          <button onclick="fillPrompt('老夫，帮我盯住这个页面，每 4 小时巡检一次：https://github.com/fastapi/fastapi/releases，一旦有新版本发布立刻叫我')" class="w-full text-left p-2 rounded-lg bg-white hover:bg-blue-50 hover:border-blue-200 border border-slate-200/80 transition-all text-slate-700">
+            🌐 <span class="font-medium text-purple-900">盯盘哨兵：</span>部署 GitHub Release 变动监控
+          </button>
+          <button onclick="fillPrompt('老夫，抓一下这个技术文档链接，帮我萃取核心正文要点：https://fastapi.tiangolo.com/tutorial/first-steps/')" class="w-full text-left p-2 rounded-lg bg-white hover:bg-blue-50 hover:border-blue-200 border border-slate-200/80 transition-all text-slate-700">
+            📑 <span class="font-medium text-emerald-900">网页萃取：</span>清洗广告剔除噪音提取干货
           </button>
         </div>
       </div>
 
     </aside>
 
-    <!-- 中间：核心沉浸式对话工作台 (占据 6 列) -->
-    <section class="lg:col-span-6 flex flex-col bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden h-[820px]">
+    <!-- 中间：核心沉浸式对话工作台 (占据 5 列) -->
+    <section class="lg:col-span-5 flex flex-col bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden h-[860px]">
       
       <!-- 对话头部状态条 -->
       <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
@@ -233,7 +238,7 @@
           <i data-lucide="bell" class="w-5 h-5 text-violet-600 mt-0.5 shrink-0"></i>
           <div>
             <div class="flex items-center space-x-2">
-              <span id="proactiveBannerTitle" class="text-xs font-bold text-violet-900">周五技术复盘与周末充电关怀</span>
+              <span id="proactiveBannerTitle" class="text-xs font-bold text-violet-900">猫老主动预警</span>
               <span class="text-[10px] px-1.5 py-0.2 rounded bg-violet-200/70 text-violet-800">主动触达</span>
             </div>
             <p id="proactiveBannerContent" class="text-xs text-slate-700 mt-0.5 leading-relaxed"></p>
@@ -256,9 +261,15 @@
           <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-sm">
             <i data-lucide="bot" class="w-4 h-4"></i>
           </div>
-          <div class="bg-slate-100 text-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] text-sm leading-relaxed border border-slate-200/60 shadow-sm">
-            <p class="font-medium text-slate-900 mb-1">MaoWu 技术导师：</p>
-            <p>你好！我是你的专属技术 Mentor。不管是架构设计探讨、排障卡壳、踩坑复盘，还是技术选型调研，随时告诉我。我已调取你的技术画像与历史经验日记，随时开始探讨！</p>
+          <div class="bg-slate-100 text-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[90%] text-sm leading-relaxed border border-slate-200/60 shadow-sm">
+            <p class="font-medium text-slate-900 mb-1">MaoWu（猫老）坐诊中：</p>
+            <p class="mb-2">伸手，老夫给你把把脉！不管是架构代码病、职场拖拉病，还是需要老夫动手跑 Python 出表格、记待办备忘、或者盯着外网某个页面变动，直接把活扔过来！</p>
+            <div class="text-xs text-slate-500 border-t border-slate-200/80 pt-2 flex flex-wrap gap-2">
+              <span class="bg-white px-2 py-0.5 rounded border border-slate-200">🐍 Python 沙箱执行</span>
+              <span class="bg-white px-2 py-0.5 rounded border border-slate-200">📥 实体 Excel 一键生成</span>
+              <span class="bg-white px-2 py-0.5 rounded border border-slate-200">📌 个人 TODO 敏捷督办</span>
+              <span class="bg-white px-2 py-0.5 rounded border border-slate-200">🌐 网页情报盯盘哨兵</span>
+            </div>
           </div>
         </div>
       </div>
@@ -266,7 +277,7 @@
       <!-- 思考中指示器 -->
       <div id="thinkingIndicator" class="hidden px-5 py-2 text-xs text-blue-600 bg-blue-50/60 border-t border-blue-100 flex items-center space-x-2">
         <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-blue-600"></i>
-        <span>正在装配工作记忆并调用 DeepSeek-V4-Pro 深度思考中...</span>
+        <span>猫老正在运针把脉、装配工作记忆并调用 DeepSeek 执行中...</span>
       </div>
 
       <!-- 输入框底栏 -->
@@ -276,7 +287,7 @@
             <textarea
               id="messageInput"
               rows="3"
-              placeholder="向技术导师提问...（例如：遇到系统卡点、线上Bug根因排查、架构对比等，Ctrl+Enter 快速发送）"
+              placeholder="向猫老提问或派发任务...（支持执行Python、导出Excel、记录待办、抓取网页等，Ctrl+Enter 快速发送）"
               class="w-full p-3 resize-none border-0 focus:ring-0 text-sm placeholder:text-slate-400 outline-none rounded-xl"
               onkeydown="if(event.ctrlKey && event.keyCode === 13) handleSendMessage(event)"
             ></textarea>
@@ -292,7 +303,7 @@
             </div>
           </div>
           <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
-            <span>支持 Markdown 代码块解析 · 支持多轮记忆装配</span>
+            <span>支持 Markdown 解析 · 实体文件直链下载 · 工具链自动闭环</span>
             <span>按 Ctrl + Enter 快捷发送</span>
           </div>
         </form>
@@ -300,47 +311,190 @@
 
     </section>
 
-    <!-- 右侧侧边栏：工作记忆装配视窗与异步子代理监控 (占据 3 列) -->
-    <aside class="lg:col-span-3 space-y-6">
-
-      <!-- 工作记忆实时装配视窗 (WMA Inspector) -->
-      <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
-          <div class="flex items-center space-x-2">
-            <i data-lucide="cpu" class="w-5 h-5 text-indigo-600"></i>
-            <h3 class="font-semibold text-slate-900 text-sm">WMA 工作记忆装配台</h3>
-          </div>
-          <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium">渐进式召回</span>
+    <!-- 右侧侧边栏：多功能仪表盘工作台 (占据 4 列，支持 Tabs 切换) -->
+    <aside class="lg:col-span-4 flex flex-col bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden h-[860px]">
+      
+      <!-- Tab 切换导航条 -->
+      <div class="p-2.5 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between">
+        <div class="flex items-center space-x-1 bg-slate-200/80 p-1 rounded-xl text-xs font-medium w-full">
+          <button id="tabBtn-tasks" onclick="switchDashboardTab('tasks')" class="flex-1 py-1.5 px-2 rounded-lg bg-white text-blue-700 shadow-sm font-semibold flex items-center justify-center space-x-1 transition-all">
+            <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+            <span>待办便签</span>
+          </button>
+          <button id="tabBtn-files" onclick="switchDashboardTab('files')" class="flex-1 py-1.5 px-2 rounded-lg text-slate-600 hover:text-slate-900 flex items-center justify-center space-x-1 transition-all">
+            <i data-lucide="folder-down" class="w-3.5 h-3.5"></i>
+            <span>文件中心</span>
+          </button>
+          <button id="tabBtn-sentinel" onclick="switchDashboardTab('sentinel')" class="flex-1 py-1.5 px-2 rounded-lg text-slate-600 hover:text-slate-900 flex items-center justify-center space-x-1 transition-all">
+            <i data-lucide="radar" class="w-3.5 h-3.5"></i>
+            <span>监控哨兵</span>
+          </button>
+          <button id="tabBtn-cognitive" onclick="switchDashboardTab('cognitive')" class="flex-1 py-1.5 px-2 rounded-lg text-slate-600 hover:text-slate-900 flex items-center justify-center space-x-1 transition-all">
+            <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+            <span>工作记忆</span>
+          </button>
         </div>
-        <p class="text-xs text-slate-500 mb-3 leading-relaxed">展示当前 Prompt 注入的瞬时历史踩坑与技术日记，保证有限 Token 下最高密度排障现场：</p>
-        <div id="wmaMemoriesList" class="space-y-2.5 max-h-[300px] overflow-y-auto text-xs">
-          <!-- 默认占位 -->
-          <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-600">
-            <div class="font-semibold text-slate-800 mb-1 flex items-center justify-between">
-              <span>Windows 环境 psycopg 驱动缺 libpq</span>
-              <span class="text-[10px] px-1 bg-amber-100 text-amber-800 rounded">权重:5</span>
+      </div>
+
+      <!-- Tab 1 内容区：私人待办与备忘录 -->
+      <div id="tabPanel-tasks" class="flex-1 p-5 overflow-y-auto space-y-5 text-xs">
+        <!-- 待办任务看板 -->
+        <div>
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="list-todo" class="w-4 h-4 text-blue-600"></i>
+              <h3 class="font-bold text-slate-900 text-sm">今日待办事项 (TODO)</h3>
             </div>
-            <p class="text-[11px] text-slate-500">【根因】Windows缺少底层C动态库，需安装psycopg[binary]预编译包。</p>
+            <button onclick="loadTasksList()" class="text-blue-600 hover:text-blue-800 font-medium text-[11px] flex items-center space-x-1">
+              <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+              <span>刷新</span>
+            </button>
+          </div>
+
+          <!-- 快速添加小输入条 -->
+          <div class="flex items-center space-x-2 mb-3">
+            <input id="quickTaskInput" type="text" placeholder="快速添加新待办..." class="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-blue-500" />
+            <select id="quickTaskPriority" class="px-2 py-1.5 border border-slate-200 rounded-lg text-xs bg-slate-50 text-slate-700">
+              <option value="high">高优</option>
+              <option value="medium" selected>中等</option>
+              <option value="low">低优</option>
+            </select>
+            <button onclick="handleCreateQuickTask()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm">添加</button>
+          </div>
+
+          <!-- 待办列表容器 -->
+          <div id="dashboardTasksContainer" class="space-y-2">
+            <div class="text-slate-400 py-3 text-center">正在加载待办事项...</div>
+          </div>
+        </div>
+
+        <!-- 工作备忘与知识便签 -->
+        <div class="pt-2 border-t border-slate-100">
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="file-text" class="w-4 h-4 text-indigo-600"></i>
+              <h3 class="font-bold text-slate-900 text-sm">个人工作备忘录</h3>
+            </div>
+            <button onclick="loadNotesList()" class="text-indigo-600 hover:text-indigo-800 font-medium text-[11px] flex items-center space-x-1">
+              <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+              <span>刷新</span>
+            </button>
+          </div>
+          <div id="dashboardNotesContainer" class="space-y-2">
+            <div class="text-slate-400 py-3 text-center">正在加载备忘录...</div>
           </div>
         </div>
       </div>
 
-      <!-- 异步子代理工单与监控卡片 (Sub-Agent Dispatcher Monitor) -->
-      <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
-          <div class="flex items-center space-x-2">
-            <i data-lucide="activity" class="w-5 h-5 text-sky-600"></i>
-            <h3 class="font-semibold text-slate-900 text-sm">后台子代理任务监控</h3>
+      <!-- Tab 2 内容区：工作区文件中心 (沙箱产物下载) -->
+      <div id="tabPanel-files" class="hidden flex-1 p-5 overflow-y-auto space-y-4 text-xs">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+          <div>
+            <h3 class="font-bold text-slate-900 text-sm flex items-center space-x-1.5">
+              <i data-lucide="folder" class="w-4 h-4 text-amber-500"></i>
+              <span>工作区生成文件 (`data/workspace/`)</span>
+            </h3>
+            <p class="text-[11px] text-slate-500 mt-0.5">MaoWu 在沙箱执行 Python 导出的实体表格与数据文件</p>
           </div>
-          <span class="text-[10px] text-slate-400">并发事件总线</span>
+          <button onclick="loadWorkspaceFiles()" class="text-blue-600 hover:text-blue-800 font-medium text-[11px] flex items-center space-x-1">
+            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+            <span>刷新文件</span>
+          </button>
         </div>
-        <div id="tasksList" class="space-y-2 text-xs max-h-[300px] overflow-y-auto">
-          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-medium text-slate-800">记忆沉淀子代理</span>
-              <span class="px-1.5 py-0.5 text-[10px] bg-emerald-50 text-emerald-700 rounded border border-emerald-200">待命中</span>
+
+        <div id="workspaceFilesList" class="space-y-2">
+          <div class="text-slate-400 py-3 text-center">正在加载工作区文件列表...</div>
+        </div>
+      </div>
+
+      <!-- Tab 3 内容区：网页监控哨兵 (Web Sentinel) -->
+      <div id="tabPanel-sentinel" class="hidden flex-1 p-5 overflow-y-auto space-y-5 text-xs">
+        <div>
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div>
+              <h3 class="font-bold text-slate-900 text-sm flex items-center space-x-1.5">
+                <i data-lucide="satellite-dish" class="w-4 h-4 text-purple-600"></i>
+                <span>全天候网页变动监控清单</span>
+              </h3>
+              <p class="text-[11px] text-slate-500 mt-0.5">后台自动比对内容指纹，检测突发更新</p>
             </div>
-            <p class="text-[11px] text-slate-500">每轮对话后自动触发，静默提取排障踩坑经验入库</p>
+            <div class="flex items-center space-x-1.5">
+              <button onclick="handleTriggerCheckAllWeb()" class="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-[11px] font-medium shadow-sm transition-colors">
+                一键立即巡检
+              </button>
+              <button onclick="loadWebTargets()" class="p-1 text-slate-500 hover:text-slate-700">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="webTargetsContainer" class="mt-3 space-y-2.5">
+            <div class="text-slate-400 py-3 text-center">正在加载监控哨兵目标...</div>
+          </div>
+        </div>
+
+        <!-- 快速测试网页正文萃取 -->
+        <div class="pt-3 border-t border-slate-100">
+          <h4 class="font-bold text-slate-800 mb-2 flex items-center space-x-1.5">
+            <i data-lucide="scan-search" class="w-4 h-4 text-emerald-600"></i>
+            <span>即时网页萃取调试器</span>
+          </h4>
+          <div class="space-y-2">
+            <input id="quickFetchUrl" type="url" placeholder="输入合法的网页 URL (http:// 或 https://)..." class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-emerald-500" />
+            <button onclick="handleQuickFetchWeb()" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-xs shadow-sm transition-colors">
+              🚀 立即抓取并清洗内容
+            </button>
+          </div>
+          <div id="quickFetchResult" class="hidden mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <div class="flex justify-between items-center text-slate-700 font-semibold">
+              <span id="quickFetchTitle">标题</span>
+              <span id="quickFetchLength" class="text-[10px] text-slate-400">0 字符</span>
+            </div>
+            <p id="quickFetchText" class="text-slate-600 text-[11px] leading-relaxed max-h-36 overflow-y-auto whitespace-pre-wrap"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4 内容区：认知装配与子代理监控 (原生保留) -->
+      <div id="tabPanel-cognitive" class="hidden flex-1 p-5 overflow-y-auto space-y-6 text-xs">
+        <!-- 工作记忆实时装配视窗 (WMA Inspector) -->
+        <div>
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="cpu" class="w-5 h-5 text-indigo-600"></i>
+              <h3 class="font-semibold text-slate-900 text-sm">WMA 工作记忆装配台</h3>
+            </div>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium">渐进式召回</span>
+          </div>
+          <p class="text-xs text-slate-500 mb-3 leading-relaxed">展示当前 Prompt 注入的瞬时历史踩坑与技术日记，保证有限 Token 下最高密度排障现场：</p>
+          <div id="wmaMemoriesList" class="space-y-2.5 max-h-[220px] overflow-y-auto text-xs">
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-600">
+              <div class="font-semibold text-slate-800 mb-1 flex items-center justify-between">
+                <span>Windows 环境 psycopg 驱动缺 libpq</span>
+                <span class="text-[10px] px-1 bg-amber-100 text-amber-800 rounded">权重:5</span>
+              </div>
+              <p class="text-[11px] text-slate-500">【根因】Windows缺少底层C动态库，需安装psycopg[binary]预编译包。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 异步子代理工单与监控卡片 (Sub-Agent Dispatcher Monitor) -->
+        <div class="pt-3 border-t border-slate-100">
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="activity" class="w-5 h-5 text-sky-600"></i>
+              <h3 class="font-semibold text-slate-900 text-sm">后台子代理任务监控</h3>
+            </div>
+            <span class="text-[10px] text-slate-400">并发事件总线</span>
+          </div>
+          <div id="tasksList" class="space-y-2 text-xs max-h-[220px] overflow-y-auto">
+            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-medium text-slate-800">反思与记忆沉淀子代理</span>
+                <span class="px-1.5 py-0.5 text-[10px] bg-emerald-50 text-emerald-700 rounded border border-emerald-200">待命中</span>
+              </div>
+              <p class="text-[11px] text-slate-500">每轮对话后自动触发，静默提取排障踩坑经验入库</p>
+            </div>
           </div>
         </div>
       </div>
@@ -349,9 +503,9 @@
 
   </main>
 
-  <!-- 3. 使用提示指南弹窗 (Guide Modal) -->
+  <!-- 3. 使用提示指南与新功能简介弹窗 (Guide Modal) -->
   <div id="guideModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 relative">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl border border-slate-100 relative">
       <button onclick="toggleModal('guideModal')" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
@@ -360,43 +514,60 @@
           <i data-lucide="book-open" class="w-6 h-6"></i>
         </div>
         <div>
-          <h3 class="text-lg font-bold text-slate-900">MaoWu Agent 网页使用提示指南</h3>
-          <p class="text-xs text-slate-500">了解智能体核心设计与四大维度的互动技巧</p>
+          <h3 class="text-lg font-bold text-slate-900">MaoWu Agent 全功能实操手册 & 核心三大升级</h3>
+          <p class="text-xs text-slate-500">从「冷冰冰的对话框」进化为「有双手、有记性、有眼眸」的个人专属超级智能体</p>
         </div>
       </div>
-      <div class="space-y-4 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-4">
-        <div class="p-3 rounded-xl bg-blue-50/60 border border-blue-100">
-          <h4 class="font-bold text-blue-900 mb-1 flex items-center space-x-1">
-            <span>1. 技术导师的人设互动（有人味）</span>
+      
+      <div class="space-y-3.5 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-4 max-h-[520px] overflow-y-auto pr-1">
+        
+        <!-- 升级 1 -->
+        <div class="p-3.5 rounded-xl bg-blue-50/70 border border-blue-100">
+          <h4 class="font-bold text-blue-900 mb-1.5 flex items-center space-x-1.5 text-sm">
+            <span>🔥 升级一：动手干活 —— Python 沙箱与实体 Excel 报表直接交付</span>
           </h4>
-          <p>MaoWu 会以沉稳敏锐、务实有启发性的导师视角与你探讨，遇到 Bug 时会引导排查根因而非敷衍给代码；对话过程中会自动演进你与它的默契值（熟悉阶梯）。</p>
+          <p class="text-slate-700 leading-relaxed">
+            MaoWu 不再只输出 Markdown 格式的死文字！它拥有专属代码隔离沙箱（<code>data/workspace/</code>），支持调用 <code>openpyxl</code>、<code>pandas</code> 等库批量处理数据，并在对话中直接生成<strong>可点击的一键下载超链接</strong>（如 <code>/api/v1/workspace/download/xxx.xlsx</code>）。你可以在右侧<strong>【文件中心】</strong>直接浏览下载全部历史生成文件。
+          </p>
         </div>
-        <div class="p-3 rounded-xl bg-indigo-50/60 border border-indigo-100">
-          <h4 class="font-bold text-indigo-900 mb-1 flex items-center space-x-1">
-            <span>2. 长期记忆与踩坑联想（能记住）</span>
+
+        <!-- 升级 2 -->
+        <div class="p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-100">
+          <h4 class="font-bold text-indigo-900 mb-1.5 flex items-center space-x-1.5 text-sm">
+            <span>📌 升级二：私人记事本 —— 待办事项 (TODO) 与备忘录持久化</span>
           </h4>
-          <p>左侧展示了从 <code>data/ltm.db</code> 持久化记忆库中检索的用户画像。当你输入相关问题（如 psycopg、Redis 连接池）时，右侧 WMA 会动态召回你的历史踩坑经验，让导师“瞬间记起你上次踩过的坑”。</p>
+          <p class="text-slate-700 leading-relaxed">
+            随口一句“老夫帮我记下明天要发版”，猫老自动打上优先级入库（基于 SQLite 持久化）。每个工作日早晨，猫老会主动巡检你的未完高优待办并毒舌敲打；你可以在右侧<strong>【待办便签】</strong>直接打勾标记完成、增删任务和翻阅技术笔记。
+          </p>
         </div>
-        <div class="p-3 rounded-xl bg-emerald-50/60 border border-emerald-100">
-          <h4 class="font-bold text-emerald-900 mb-1 flex items-center space-x-1">
-            <span>3. 对话后自动反思入库（能做深）</span>
+
+        <!-- 升级 3 -->
+        <div class="p-3.5 rounded-xl bg-purple-50/70 border border-purple-100">
+          <h4 class="font-bold text-purple-900 mb-1.5 flex items-center space-x-1.5 text-sm">
+            <span>🌐 升级三：全天候耳目 —— 网页干货萃取与目标变动盯盘哨兵</span>
           </h4>
-          <p>每轮对话结束后，后台的 <strong>Reflector 子代理</strong> 会静默分析整段聊天，自动将你提炼的技术方案写回数据库，实现“无需手动建表，越聊越懂你”。</p>
+          <p class="text-slate-700 leading-relaxed">
+            发一个长网址，猫老自动剔除广告弹窗与样式噪声，提取纯净正文用于阅读总结；吩咐猫老“盯住这个 GitHub 发布页”，猫老会将网页登记到哨兵库，后台定时比对 Hash 指纹。一旦有新版本发布，猫老会<strong>主动弹窗向你发出情报预警</strong>！
+          </p>
         </div>
-        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-          <h4 class="font-bold text-slate-900 mb-1 flex items-center space-x-1">
-            <span>4. 快捷键与常用功能</span>
+
+        <!-- 导师互动与人设 -->
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+          <h4 class="font-bold text-slate-900 mb-1 text-sm">
+            <span>💡 傲娇毒舌老中医（猫老）互动秘诀</span>
           </h4>
           <ul class="list-disc list-inside space-y-1 text-slate-600">
-            <li>发送消息：输入后点击发送或按 <code>Ctrl + Enter</code>；</li>
-            <li>顶部右上角支持一键发起异步大型架构调研工单；</li>
-            <li>切换 User ID 即可体验不同工程师独立隔离的长期记忆体系。</li>
+            <li><strong>嘴硬心软</strong>：不要被老夫的刻薄话吓退，老夫说你“代码肝火旺盛”是在帮你找真病根，方案绝对管用；</li>
+            <li><strong>快捷键</strong>：在打字框按 <code>Ctrl + Enter</code> 可以极速发送消息；</li>
+            <li><strong>文件下载</strong>：对话中出现的蓝色文件链接直接点击即可在本地保存！</li>
           </ul>
         </div>
+
       </div>
-      <div class="mt-6 flex justify-end">
+
+      <div class="mt-5 flex justify-end">
         <button onclick="toggleModal('guideModal')" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-xs transition-colors shadow-sm">
-          我知道了，开始体验
+          掌握要领，开始使用！
         </button>
       </div>
     </div>
@@ -467,8 +638,8 @@
             <i data-lucide="bot" class="w-4 h-4"></i>
           </div>
           <div class="bg-slate-100 text-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] text-sm leading-relaxed border border-slate-200/60 shadow-sm">
-            <p class="font-medium text-slate-900 mb-1">MaoWu 技术导师：</p>
-            <p>已清空当前聊天面板。随时抛出你的技术痛点或排障现场！</p>
+            <p class="font-medium text-slate-900 mb-1">MaoWu（猫老）：</p>
+            <p>已清空当前聊天面板。随时抛出你的任务需求或技术卡点！</p>
           </div>
         </div>
       `;
@@ -480,7 +651,277 @@
       return document.getElementById('userIdInput').value.trim() || 'mazikang';
     }
 
+    // 右侧仪表盘 Tabs 切换逻辑
+    function switchDashboardTab(tabName) {
+      const tabs = ['tasks', 'files', 'sentinel', 'cognitive'];
+      tabs.forEach(t => {
+        const panel = document.getElementById(`tabPanel-${t}`);
+        const btn = document.getElementById(`tabBtn-${t}`);
+        if (t === tabName) {
+          panel.classList.remove('hidden');
+          btn.className = 'flex-1 py-1.5 px-2 rounded-lg bg-white text-blue-700 shadow-sm font-semibold flex items-center justify-center space-x-1 transition-all';
+        } else {
+          panel.classList.add('hidden');
+          btn.className = 'flex-1 py-1.5 px-2 rounded-lg text-slate-600 hover:text-slate-900 flex items-center justify-center space-x-1 transition-all';
+        }
+      });
+      lucide.createIcons();
+
+      // 按需加载数据
+      if (tabName === 'tasks') {
+        loadTasksList();
+        loadNotesList();
+      } else if (tabName === 'files') {
+        loadWorkspaceFiles();
+      } else if (tabName === 'sentinel') {
+        loadWebTargets();
+      }
+    }
+
+    // ==========================================
+    // 待办事项 (TODO) 与备忘录 (Notes) 交互
+    // ==========================================
+    async function loadTasksList() {
+      const userId = getCurrentUserId();
+      const container = document.getElementById('dashboardTasksContainer');
+      try {
+        const resp = await fetch(`/api/v1/tasks?user_id=${userId}&limit=10`);
+        const data = await resp.json();
+        const tasks = data.tasks || [];
+        if (tasks.length === 0) {
+          container.innerHTML = '<div class="text-slate-400 py-3 text-center">暂无待办事项，手头清清爽爽！</div>';
+          return;
+        }
+
+        const priColors = {
+          high: 'bg-rose-50 text-rose-700 border-rose-200',
+          medium: 'bg-amber-50 text-amber-700 border-amber-200',
+          low: 'bg-slate-100 text-slate-600 border-slate-200'
+        };
+
+        container.innerHTML = tasks.map(t => `
+          <div class="p-2.5 rounded-xl border ${t.status === 'done' ? 'bg-slate-50/70 border-slate-200 opacity-60' : 'bg-white border-slate-200/80 shadow-xs'} flex items-start justify-between space-x-2">
+            <div class="flex items-start space-x-2 flex-1">
+              <input type="checkbox" ${t.status === 'done' ? 'checked' : ''} onchange="handleToggleTaskDone('${t.id}', this.checked)" class="mt-0.5 rounded text-blue-600 cursor-pointer" />
+              <div class="flex-1">
+                <p class="font-medium text-slate-800 ${t.status === 'done' ? 'line-through text-slate-400' : ''}">${escapeHtml(t.title)}</p>
+                ${t.due_date ? `<span class="text-[10px] text-slate-400">截止: ${escapeHtml(t.due_date)}</span>` : ''}
+              </div>
+            </div>
+            <div class="flex items-center space-x-1 shrink-0">
+              <span class="text-[10px] px-1.5 py-0.5 rounded border ${priColors[t.priority] || priColors.medium}">${t.priority.toUpperCase()}</span>
+              <button onclick="handleDeleteTask('${t.id}')" class="text-slate-400 hover:text-rose-600 p-0.5"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+            </div>
+          </div>
+        `).join('');
+        lucide.createIcons();
+      } catch (e) {
+        container.innerHTML = `<div class="text-rose-500 py-2">加载失败: ${e.message}</div>`;
+      }
+    }
+
+    async function handleCreateQuickTask() {
+      const input = document.getElementById('quickTaskInput');
+      const pri = document.getElementById('quickTaskPriority').value;
+      const title = input.value.trim();
+      if (!title) return;
+      const userId = getCurrentUserId();
+
+      try {
+        await fetch('/api/v1/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, title, priority: pri })
+        });
+        input.value = '';
+        await loadTasksList();
+      } catch (e) {
+        alert('添加失败: ' + e.message);
+      }
+    }
+
+    async function handleToggleTaskDone(taskId, isDone) {
+      const userId = getCurrentUserId();
+      try {
+        await fetch(`/api/v1/tasks/${taskId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, status: isDone ? 'done' : 'pending' })
+        });
+        await loadTasksList();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function handleDeleteTask(taskId) {
+      const userId = getCurrentUserId();
+      try {
+        await fetch(`/api/v1/tasks/${taskId}?user_id=${userId}`, { method: 'DELETE' });
+        await loadTasksList();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function loadNotesList() {
+      const userId = getCurrentUserId();
+      const container = document.getElementById('dashboardNotesContainer');
+      try {
+        const resp = await fetch(`/api/v1/notes?user_id=${userId}&limit=5`);
+        const data = await resp.json();
+        const notes = data.notes || [];
+        if (notes.length === 0) {
+          container.innerHTML = '<div class="text-slate-400 py-2 text-center">暂无备忘笔记，可在聊天时让老夫记录！</div>';
+          return;
+        }
+
+        container.innerHTML = notes.map(n => `
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="font-semibold text-slate-800">${escapeHtml(n.title)}</span>
+              <span class="text-[10px] text-slate-400">${n.created_at ? n.created_at.slice(0, 10) : ''}</span>
+            </div>
+            <p class="text-slate-600 text-[11px] leading-relaxed line-clamp-2">${escapeHtml(n.content)}</p>
+          </div>
+        `).join('');
+        lucide.createIcons();
+      } catch (e) {
+        container.innerHTML = `<div class="text-rose-500 py-2">加载失败: ${e.message}</div>`;
+      }
+    }
+
+    // ==========================================
+    // 工作区文件列表与直链下载 (Workspace Files)
+    // ==========================================
+    async function loadWorkspaceFiles() {
+      const container = document.getElementById('workspaceFilesList');
+      try {
+        const resp = await fetch('/api/v1/workspace/files');
+        const data = await resp.json();
+        const files = data.files || [];
+        if (files.length === 0) {
+          container.innerHTML = '<div class="text-slate-400 py-6 text-center">工作区暂无生成文件。可在对话中让老夫执行 Python 生成表格！</div>';
+          return;
+        }
+
+        container.innerHTML = files.map(f => `
+          <div class="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between space-x-3 hover:border-blue-300 transition-colors">
+            <div class="flex items-center space-x-2.5 truncate">
+              <div class="w-8 h-8 rounded-lg ${f.name.endsWith('.xlsx') ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'} flex items-center justify-center shrink-0">
+                <i data-lucide="${f.name.endsWith('.xlsx') ? 'sheet' : 'file-code'}" class="w-4 h-4"></i>
+              </div>
+              <div class="truncate">
+                <p class="font-medium text-slate-800 truncate">${escapeHtml(f.name)}</p>
+                <p class="text-[10px] text-slate-400">${f.size_human} · 更新于 ${f.modified ? f.modified.slice(0, 16).replace('T', ' ') : ''}</p>
+              </div>
+            </div>
+            <a href="${f.download_url}" target="_blank" download class="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-medium text-xs border border-blue-200 shrink-0 transition-colors">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>下载</span>
+            </a>
+          </div>
+        `).join('');
+        lucide.createIcons();
+      } catch (e) {
+        container.innerHTML = `<div class="text-rose-500 py-3">加载文件失败: ${e.message}</div>`;
+      }
+    }
+
+    // ==========================================
+    // 网页监控哨兵 (Web Sentinel) 交互
+    // ==========================================
+    async function loadWebTargets() {
+      const userId = getCurrentUserId();
+      const container = document.getElementById('webTargetsContainer');
+      try {
+        const resp = await fetch(`/api/v1/web-watch/targets?user_id=${userId}`);
+        const data = await resp.json();
+        const targets = data.targets || [];
+        if (targets.length === 0) {
+          container.innerHTML = '<div class="text-slate-400 py-4 text-center">暂未部署监控哨兵。可吩咐老夫：“帮我盯住这个网站”！</div>';
+          return;
+        }
+
+        container.innerHTML = targets.map(t => `
+          <div class="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="font-semibold text-slate-800 text-xs">${escapeHtml(t.name)}</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-medium">每${t.check_interval_hours}h巡检</span>
+            </div>
+            <p class="text-[10px] text-slate-400 truncate">${escapeHtml(t.url)}</p>
+            <div class="text-[11px] text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100 flex items-start space-x-1.5">
+              <i data-lucide="info" class="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0"></i>
+              <span class="leading-relaxed">${escapeHtml(t.change_summary || '状态正常，未见异常波动')}</span>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1">
+              <span>最近检查: ${t.last_check_time ? t.last_check_time.slice(0, 16).replace('T', ' ') : '等待采样'}</span>
+              <button onclick="handleDeleteWebTarget('${t.id}')" class="text-slate-400 hover:text-rose-600">注销监控</button>
+            </div>
+          </div>
+        `).join('');
+        lucide.createIcons();
+      } catch (e) {
+        container.innerHTML = `<div class="text-rose-500 py-2">加载失败: ${e.message}</div>`;
+      }
+    }
+
+    async function handleTriggerCheckAllWeb() {
+      const userId = getCurrentUserId();
+      try {
+        const resp = await fetch(`/api/v1/web-watch/check-all?user_id=${userId}`, { method: 'POST' });
+        const data = await resp.json();
+        alert(data.message || '巡检完成');
+        await loadWebTargets();
+      } catch (e) {
+        alert('巡检失败: ' + e.message);
+      }
+    }
+
+    async function handleDeleteWebTarget(targetId) {
+      try {
+        await fetch(`/api/v1/web-watch/targets/${targetId}`, { method: 'DELETE' });
+        await loadWebTargets();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function handleQuickFetchWeb() {
+      const input = document.getElementById('quickFetchUrl');
+      const url = input.value.trim();
+      if (!url) return;
+
+      const resBox = document.getElementById('quickFetchResult');
+      resBox.classList.remove('hidden');
+      document.getElementById('quickFetchTitle').innerText = '正在萃取清洗中...';
+      document.getElementById('quickFetchLength').innerText = '';
+      document.getElementById('quickFetchText').innerText = '';
+
+      try {
+        const resp = await fetch('/api/v1/web-watch/fetch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, max_chars: 2000 })
+        });
+        const data = await resp.json();
+        if (data.success) {
+          document.getElementById('quickFetchTitle').innerText = data.title || '无标题页面';
+          document.getElementById('quickFetchLength').innerText = `${data.full_length} 字符`;
+          document.getElementById('quickFetchText').innerText = data.text;
+        } else {
+          document.getElementById('quickFetchTitle').innerText = '萃取失败';
+          document.getElementById('quickFetchText').innerText = data.detail || '未知原因';
+        }
+      } catch (e) {
+        document.getElementById('quickFetchTitle').innerText = '请求异常';
+        document.getElementById('quickFetchText').innerText = e.message;
+      }
+    }
+
+    // ==========================================
     // 主动关怀与防打扰中枢交互逻辑
+    // ==========================================
     async function fetchProactiveStatus() {
       const userId = getCurrentUserId();
       try {
@@ -529,7 +970,7 @@
           
           const replyBtn = document.getElementById('proactiveReplyBtn');
           replyBtn.onclick = () => {
-            fillPrompt(`导师，针对你刚才提到的【${latest.title}】，我的想法是：`);
+            fillPrompt(`老夫，针对你刚才提醒的【${latest.title}】，我的看法是：`);
             handleAckProactive(latest.id, 'read');
           };
 
@@ -568,7 +1009,7 @@
           await fetchProactiveStatus();
           // 同时在主聊天界面插入一条导师主动问候
           const msg = res.proactive_message;
-          appendMessage('assistant', `🔔 **【导师主动触达 · ${msg.title}】**\n\n${msg.content}`);
+          appendMessage('assistant', `🔔 **【猫老主动触达 · ${msg.title}】**\n\n${msg.content}`);
         } else {
           alert('主动决策跳过：' + res.message);
         }
@@ -602,6 +1043,10 @@
       badge.textContent = '熟络伙伴 · 深度信任';
       await fetchProactiveStatus();
       await fetchProactiveMessages();
+      await loadTasksList();
+      await loadNotesList();
+      await loadWorkspaceFiles();
+      await loadWebTargets();
       lucide.createIcons();
     }
 
@@ -626,7 +1071,6 @@
       const aiMessageEl = appendMessage('assistant', '');
 
       try {
-        // 调用标准兼容接口 /v1/chat/completions (启用 stream=true)
         const response = await fetch('/v1/chat/completions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -659,7 +1103,7 @@
                   const data = JSON.parse(jsonStr);
                   const token = data.choices[0]?.delta?.content || '';
                   fullText += token;
-                  aiMessageEl.innerText = fullText;
+                  aiMessageEl.innerHTML = renderMarkdown(fullText);
                 }
               } catch (err) {
                 console.warn('Parse SSE error:', err);
@@ -668,11 +1112,12 @@
           }
         }
 
-        // 模拟触发后台子代理更新任务卡片
-        addOrUpdateTaskCard('反思与记忆沉淀子代理', 'running', '正在后台提取排障根因并沉淀入库...');
+        // 会话结束后触发右侧各面板自动刷新（待办变动、生成文件刷新）
         setTimeout(() => {
-          addOrUpdateTaskCard('反思与记忆沉淀子代理', 'completed', '已完成排障经验提炼，成功归档至 LTM');
-        }, 3500);
+          loadTasksList();
+          loadWorkspaceFiles();
+          loadWebTargets();
+        }, 1200);
 
       } catch (err) {
         aiMessageEl.innerText = '【系统提示】请求执行失败：' + err.message;
@@ -680,6 +1125,36 @@
         indicator.classList.add('hidden');
         lucide.createIcons();
       }
+    }
+
+    // 轻量级 Markdown 与链接渲染器（支持直链下载点击）
+    function renderMarkdown(rawText) {
+      if (!rawText) return '';
+      let escaped = escapeHtml(rawText);
+
+      // 1. 代码块 ```text```
+      escaped = escaped.replace(/```([\s\S]*?)```/g, (match, p1) => {
+        return `<pre class="bg-slate-800 text-slate-100 p-3 rounded-xl my-2 overflow-x-auto text-xs font-mono"><code>${p1.trim()}</code></pre>`;
+      });
+
+      // 2. 行内代码 `code`
+      escaped = escaped.replace(/`([^`]+)`/g, '<code class="bg-slate-200 text-slate-800 px-1 py-0.5 rounded text-xs font-mono">$1</code>');
+
+      // 3. 粗体 **bold**
+      escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-slate-900">$1</strong>');
+
+      // 4. Markdown 链接 [text](url) -> 渲染为精致带下载图标的交互按钮
+      escaped = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, title, url) => {
+        const isDownload = url.includes('/download/') || url.endsWith('.xlsx') || url.endsWith('.csv');
+        return `<a href="${url}" target="_blank" download class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-semibold ${isDownload ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm' : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'} transition-all my-1">
+          <span>${title}</span>
+          <i data-lucide="${isDownload ? 'download' : 'external-link'}" class="w-3.5 h-3.5"></i>
+        </a>`;
+      });
+
+      // 5. 换行
+      escaped = escaped.replace(/\n/g, '<br/>');
+      return escaped;
     }
 
     // 渲染消息节点
@@ -706,9 +1181,9 @@
           <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-sm">
             <i data-lucide="bot" class="w-4 h-4"></i>
           </div>
-          <div class="bg-slate-100 text-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] text-sm leading-relaxed border border-slate-200/60 shadow-sm">
-            <p class="font-medium text-slate-900 mb-1">MaoWu 技术导师：</p>
-            <div class="chat-content whitespace-pre-wrap leading-relaxed">${escapeHtml(text)}</div>
+          <div class="bg-slate-100 text-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[90%] text-sm leading-relaxed border border-slate-200/60 shadow-sm">
+            <p class="font-medium text-slate-900 mb-1">MaoWu（猫老）：</p>
+            <div class="chat-content leading-relaxed">${renderMarkdown(text)}</div>
           </div>
         `;
         container.appendChild(msgWrapper);
@@ -742,14 +1217,12 @@
         const data = await resp.json();
         const taskId = data.task_id;
         
-        // 轮询检查调研进度
         const timer = setInterval(async () => {
           const qResp = await fetch('/api/v1/subagents/tasks/' + taskId);
           const qData = await qResp.json();
           if (qData.task_status === 'completed') {
             clearInterval(timer);
             addOrUpdateTaskCard('深度技术调研子代理', 'completed', '【调研已完成】' + topic);
-            // 自动在聊天框呈现调研摘要
             appendMessage('assistant', `### 📊 异步技术调研报告完成回流：\n**主题**：${topic}\n\n${qData.result?.report || '已归档'}`);
           }
         }, 5000);
@@ -759,9 +1232,10 @@
       }
     }
 
-    // 更新右侧任务卡片
+    // 更新任务卡片
     function addOrUpdateTaskCard(name, status, desc) {
       const container = document.getElementById('tasksList');
+      if (!container) return;
       const statusMap = {
         running: '<span class="px-1.5 py-0.5 text-[10px] bg-blue-50 text-blue-700 rounded border border-blue-200 animate-pulse">执行中</span>',
         completed: '<span class="px-1.5 py-0.5 text-[10px] bg-emerald-50 text-emerald-700 rounded border border-emerald-200">已完成</span>',
@@ -789,10 +1263,12 @@
         .replace(/'/g, '&#39;');
     }
 
-    // 页面初次加载时拉取防打扰状态与主动关怀消息
+    // 页面初次加载时拉取防打扰状态、主动关怀与默认面板数据
     window.addEventListener('DOMContentLoaded', () => {
       fetchProactiveStatus();
       fetchProactiveMessages();
+      loadTasksList();
+      loadNotesList();
     });
   </script>
 </body>
