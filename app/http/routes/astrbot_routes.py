@@ -87,8 +87,28 @@ async def _run_maowu_agent(user_id: str, prompt: str, thread_id: str | None = No
                         yield content
                 except Exception:
                     pass
+        elif event_name == "tool_call":
+            data_raw = event.get("data")
+            tool_name = ""
+            if data_raw:
+                try:
+                    tool_data = json.loads(data_raw) if isinstance(data_raw, str) else data_raw
+                    tool_name = tool_data.get("name", "")
+                except Exception:
+                    pass
+            tool_desc = {
+                "fetch_web_content": "正在抓取网页内容与清洗降噪",
+                "execute_python": "正在沙箱中执行 Python 数据处理脚本",
+                "manage_workspace_files": "正在操作工作区文件",
+                "manage_todo": "正在读写个人待办事项",
+                "manage_notes": "正在检索备忘录与技术笔记",
+                "manage_web_watch": "正在配置与巡检网站监控哨兵",
+                "sql_db_query": "正在执行业务数据库安全查询",
+            }.get(tool_name, f"正在执行工具 [{tool_name}]")
+            yield f"\n\n> ⚙️ *【猫老正在动手】{tool_desc}...*\n\n"
         elif event_name == "error":
             logger.error(f"Agent error event: {event.get('data')}")
+
 
 
 # ========================================================
