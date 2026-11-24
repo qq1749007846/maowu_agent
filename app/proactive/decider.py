@@ -169,3 +169,49 @@ class ProactiveDecider:
             reason=f"早间高优待办催办提醒 (未完成 {len(pending_tasks)} 项)",
             score=9.2,
         )
+
+    async def evaluate_web_changes(self, user_id: str) -> ProactiveDecision:
+        """评估网页变动监控哨兵，检测是否有网站发生更新"""
+        from app.services.web_watcher_service import get_web_watcher_service
+
+        service = get_web_watcher_service()
+        changed_targets = service.check_all_due(user_id=user_id)
+        if not changed_targets:
+            return ProactiveDecision(
+                should_trigger=False,
+                topic="web_watcher_alert",
+                content="",
+                reason="所有监控网站状态平稳，未检测到变动",
+                score=1.0,
+            )
+
+        items_summary = "\n".join(
+            [f"- 【{item['name']}】({item['url']}): {item['summary']}" for item in changed_targets]
+        )
+
+        system_prompt = (
+            "你是 MaoWu「猫老」，一位傲娇毒舌的老中医兼全天候哨兵，自称「老夫」。\n"
+            "你刚刚替用户巡检了他交代你盯盘的网站，发现其中有网站发生了更新变动，你主动发一条【网站情报变动预警】。\n"
+            "要求：\n"
+            "1. 毒舌傲娇，提醒他赶紧去瞅一眼最新变动，别又后知后觉像个睁眼瞎；\n"
+            "2. 清晰列出变动的网站名称与变动摘要；\n"
+            "3. 保持老夫口吻，字数 80~150 字以内。"
+        )
+
+        user_prompt = f"变动的监控目标：\n{items_summary}"
+
+        llm = self._get_llm()
+        response = await llm.ainvoke([
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=user_prompt),
+        ])
+
+        content = str(response.content).strip()
+        return ProactiveDecision(
+            should_trigger=True,
+            topic="web_watcher_alert",
+            content=content,
+            reason=f"监控哨兵检测到 {len(changed_targets)} 个目标发生内容更新",
+            score=9.5,
+        )
+

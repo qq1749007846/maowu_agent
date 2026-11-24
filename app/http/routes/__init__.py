@@ -5,6 +5,7 @@ from .proactive_routes import proactive_router
 from .runs_routes import runs_router
 from .task_note_routes import task_note_router
 from .thread_routes import thread_router
+from .web_watch_routes import web_watch_router
 from .workspace_routes import workspace_router
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "db_router",
     "workspace_router",
     "task_note_router",
+    "web_watch_router",
 ]

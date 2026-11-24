@@ -139,24 +139,34 @@ class ProactiveScheduler:
         elif trigger_type == "morning_tasks":
             decision = await self.decider.evaluate_morning_tasks(user_id)
             topic_title = "猫老晨间脉案与待办催办"
+        elif trigger_type == "web_watcher":
+            decision = await self.decider.evaluate_web_changes(user_id)
+            topic_title = "猫老监控哨兵：网站情报变动提醒"
         else:
             # 自动探测策略：
-            # 1. 如果是早晨（8:00 - 12:00），优先探测是否有未结清的待办任务催办
-            if 8 <= now.hour < 12 and now.weekday() < 5:
+            # 1. 优先探测监控哨兵是否有紧急网站变动
+            watcher_decision = await self.decider.evaluate_web_changes(user_id)
+            if watcher_decision and watcher_decision.should_trigger and watcher_decision.score >= 6.0:
+                decision = watcher_decision
+                topic_title = "猫老监控哨兵：网站情报变动提醒"
+
+            # 2. 如果是早晨（8:00 - 12:00），探测是否有未结清的待办任务催办
+            if not decision and 8 <= now.hour < 12 and now.weekday() < 5:
                 morning_decision = await self.decider.evaluate_morning_tasks(user_id)
                 if morning_decision and morning_decision.should_trigger and morning_decision.score >= 6.0:
                     decision = morning_decision
                     topic_title = "猫老晨间脉案与待办催办"
 
-            # 2. 如果是周五且当前时间大于 15:00，发起周度技术复盘
+            # 3. 如果是周五且当前时间大于 15:00，发起周度技术复盘
             if not decision and now.weekday() == 4 and now.hour >= 15:
                 decision = await self.decider.evaluate_weekly_review(user_id)
                 topic_title = "周五技术复盘与周末充电关怀"
 
-            # 3. 否则探测是否有未关闭或近期的排障阻塞
+            # 4. 否则探测是否有未关闭或近期的排障阻塞
             if not decision:
                 decision = await self.decider.evaluate_blocker_followup(user_id)
                 topic_title = "近期排障卡点与稳定性回访"
+
 
         if not decision or not decision.should_trigger or decision.score < 6.0:
             logger.info(f"Proactive trigger score too low for user '{user_id}' (topic={trigger_type})")
