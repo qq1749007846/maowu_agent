@@ -1,11 +1,17 @@
+from collections import deque
 from contextlib import asynccontextmanager
+from datetime import datetime
 from pathlib import Path
+import time
 from uuid import uuid4
 
 from asgi_correlation_id import CorrelationIdMiddleware
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+
+# 全局最近 HTTP 访问记录环形缓冲区（最多保留 100 条）
+_RECENT_REQUESTS: deque[dict] = deque(maxlen=100)
 
 # from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from prometheus_fastapi_instrumentator import Instrumentator as PrometheusInstrumentator
@@ -101,6 +107,37 @@ def create_app(config: AppConfig) -> FastAPI:
     # 挂载静态资源与根路径前端交互页面
     if STATIC_DIR.exists():
         app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+    @app.middleware("http")
+    async def request_audit_middleware(request: Request, call_next):
+        start_time = time.time()
+        client_ip = request.client.host if request.client else "unknown"
+        ua = request.headers.get("user-agent", "")[:120]
+        method = request.method
+        path = request.url.path
+        query = str(request.url.query)
+
+        response = await call_next(request)
+        duration_ms = round((time.time() - start_time) * 1000, 2)
+
+        _RECENT_REQUESTS.append({
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "method": method,
+            "path": path,
+            "query": query,
+            "status_code": response.status_code,
+            "client_ip": client_ip,
+            "user_agent": ua,
+            "duration_ms": duration_ms,
+        })
+        return response
+
+    @app.get("/api/v1/debug/recent-requests", tags=["Diagnostics"])
+    async def get_recent_requests(limit: int = 50):
+        """实时获取最近收到的 HTTP 请求日志，用于快速定位客户端对接异常与 405/404 路由"""
+        logs = list(_RECENT_REQUESTS)[-limit:]
+        logs.reverse()
+        return {"total_buffered": len(_RECENT_REQUESTS), "recent_requests": logs}
 
     @app.get("/", include_in_schema=False)
     async def serve_index():
