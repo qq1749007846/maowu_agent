@@ -1,0 +1,191 @@
+[
+  {
+    "module": "系统探活",
+    "item": "健康检查 (/api/v1/health)",
+    "status": "PASS",
+    "detail": "状态码: 200, 响应: {\"status\":\"healthy\",\"timestamp\":\"2026-11-25T01:57:27.826049\"",
+    "duration": "4.181s"
+  },
+  {
+    "module": "Web前端",
+    "item": "主控制台页面加载 (GET /)",
+    "status": "PASS",
+    "detail": "状态码: 200, 页面大小: 67529 bytes, 包含MaoWu与文件中心",
+    "duration": "2.377s"
+  },
+  {
+    "module": "OpenAI协议",
+    "item": "模型列表 (/v1/models)",
+    "status": "PASS",
+    "detail": "模型数: 4, 包含: ['deepseek-v4.1-flash', 'deepseek-v4-pro', 'maowu-agent', 'openai/deepseek-v4.1-flash']",
+    "duration": "2.968s"
+  },
+  {
+    "module": "导师对话",
+    "item": "非流式补全 (/v1/chat/completions)",
+    "status": "PASS",
+    "detail": "耗时 3.85s, 输出长度: 96, 预览: *把茶杯重重一放* 一句话？哼，听好了：  **望闻问切，损你损到骨头里；开方抓药，治好治到根子上——嘴上不饶人，手上不含糊。**  ……行了，门规立完，伸手，",
+    "duration": "3.850s"
+  },
+  {
+    "module": "导师对话",
+    "item": "SSE流式逐Token推流 (/v1/chat/completions stream=True)",
+    "status": "PASS",
+    "detail": "共推流 8 个包, 文本长: 317, 包含[DONE]: True, 预览: *翻了个白眼，把三根手指往桌上一搭*  啧，你这病号有意思，坐下来一句话不说，反倒叫老夫伸手——怎么，你当老夫是跳大神的，摸一摸就能算出你昨晚几点睡的？  *把",
+    "duration": "6.219s"
+  },
+  {
+    "module": "工作区中心",
+    "item": "文件列表检索 (/api/v1/workspace/files)",
+    "status": "PASS",
+    "detail": "共 7 个文件, 发现处罚Excel: True, 元数据完备: True",
+    "duration": "2.085s"
+  },
+  {
+    "module": "工作区中心",
+    "item": "实体Excel下载 (/api/v1/workspace/download/...)",
+    "status": "PASS",
+    "detail": "下载大小: 12132 bytes, Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, Content-Disposition: attachment; filename=\"export.xlsx\"; filename*=UTF-8''%E5%B9%",
+    "duration": "2.106s"
+  },
+  {
+    "module": "工作区中心",
+    "item": "模糊别名容错下载 (/api/v1/workspace/download/广西行政处罚)",
+    "status": "PASS",
+    "detail": "容错命中下载大小: 12132 bytes",
+    "duration": "1.970s"
+  },
+  {
+    "module": "工作区中心",
+    "item": "沙箱文件上传 (/api/v1/workspace/upload/...)",
+    "status": "PASS",
+    "detail": "上传响应: {\"success\":true,\"filename\":\"e2e_test_file.txt\",\"size_bytes\":41}",
+    "duration": "2.004s"
+  },
+  {
+    "module": "TODO待办",
+    "item": "创建高优待办 (POST /api/v1/tasks)",
+    "status": "PASS",
+    "detail": "任务ID: task_9f563b20, 优先级: HIGH",
+    "duration": "1.913s"
+  },
+  {
+    "module": "TODO待办",
+    "item": "查询任务清单 (GET /api/v1/tasks)",
+    "status": "PASS",
+    "detail": "用户任务数: 1, 包含新增任务: True",
+    "duration": "1.930s"
+  },
+  {
+    "module": "TODO待办",
+    "item": "标记任务完成 (PATCH /api/v1/tasks/{id})",
+    "status": "PASS",
+    "detail": "状态更新为 completed",
+    "duration": "1.930s"
+  },
+  {
+    "module": "TODO待办",
+    "item": "删除任务 (DELETE /api/v1/tasks/{id})",
+    "status": "PASS",
+    "detail": "测试任务已安全清理",
+    "duration": "2.023s"
+  },
+  {
+    "module": "工作备忘",
+    "item": "保存技术笔记 (POST /api/v1/notes)",
+    "status": "PASS",
+    "detail": "笔记ID: note_939aa9f4",
+    "duration": "1.979s"
+  },
+  {
+    "module": "工作备忘",
+    "item": "搜索笔记 (GET /api/v1/notes?keyword=...)",
+    "status": "PASS",
+    "detail": "命中笔记数: 1",
+    "duration": "2.041s"
+  },
+  {
+    "module": "工作备忘",
+    "item": "删除笔记 (DELETE /api/v1/notes/{id})",
+    "status": "PASS",
+    "detail": "测试笔记已清理",
+    "duration": "1.988s"
+  },
+  {
+    "module": "网页哨兵",
+    "item": "网页正文萃取与Hash计算 (POST /api/v1/web-watch/fetch)",
+    "status": "PASS",
+    "detail": "成功: True, 提取长度: 998, Hash: 5246c7d14f38fd32...",
+    "duration": "2.164s"
+  },
+  {
+    "module": "网页哨兵",
+    "item": "添加监控哨兵目标 (POST /api/v1/web-watch/targets)",
+    "status": "PASS",
+    "detail": "目标ID: watch_f2ab3a9f33",
+    "duration": "2.337s"
+  },
+  {
+    "module": "网页哨兵",
+    "item": "查询监控列表 (GET /api/v1/web-watch/targets)",
+    "status": "PASS",
+    "detail": "监控目标数: 1",
+    "duration": "2.108s"
+  },
+  {
+    "module": "网页哨兵",
+    "item": "执行全网指纹巡检比对 (POST /api/v1/web-watch/check-all)",
+    "status": "PASS",
+    "detail": "巡检响应: 巡检完成，发现 0 个目标内容更新",
+    "duration": "2.132s"
+  },
+  {
+    "module": "网页哨兵",
+    "item": "注销监控目标 (DELETE /api/v1/web-watch/targets/{id})",
+    "status": "PASS",
+    "detail": "测试哨兵已注销",
+    "duration": "2.064s"
+  },
+  {
+    "module": "主动触达",
+    "item": "防打扰与触达状态查询 (/api/v1/proactive/status)",
+    "status": "PASS",
+    "detail": "允许触达: False, 静默区间: 23:00 - 8:30",
+    "duration": "1.916s"
+  },
+  {
+    "module": "主动触达",
+    "item": "主动决策问候触发 (POST /api/v1/proactive/trigger)",
+    "status": "PASS",
+    "detail": "决策状态: triggered, 标题: 周五技术复盘与周末充电关怀",
+    "duration": "4.046s"
+  },
+  {
+    "module": "主动触达",
+    "item": "获取主动触达消息队列 (/api/v1/proactive/messages)",
+    "status": "PASS",
+    "detail": "用户主动消息数: 2",
+    "duration": "2.047s"
+  },
+  {
+    "module": "主动触达",
+    "item": "消息已读确认 (POST /api/v1/proactive/ack)",
+    "status": "PASS",
+    "detail": "已标记已读",
+    "duration": "2.126s"
+  },
+  {
+    "module": "MySQL数据库",
+    "item": "数据库连接探活与表检测 (/api/v1/db/status)",
+    "status": "PASS",
+    "detail": "状态: connected, 库: resume_db, 包含数据表: []",
+    "duration": "3.234s"
+  },
+  {
+    "module": "MySQL数据库",
+    "item": "安全只读SQL执行 (/api/v1/db/query)",
+    "status": "PASS",
+    "detail": "执行状态: success, 返回行数: 1, 字段: ['probe', 'system_name']",
+    "duration": "2.544s"
+  }
+]
