@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 import time
+import urllib.parse
 from pathlib import Path
 from typing import Any
 
@@ -127,6 +128,15 @@ class CodeRunnerService:
                 "created_files": [],
             }
 
+    @staticmethod
+    def _format_size(size_bytes: int) -> str:
+        if size_bytes < 1024:
+            return f"{size_bytes} B"
+        elif size_bytes < 1024 * 1024:
+            return f"{size_bytes / 1024:.1f} KB"
+        else:
+            return f"{size_bytes / (1024 * 1024):.1f} MB"
+
     def list_files(self, subpath: str = "") -> list[dict[str, Any]]:
         """列出工作区沙箱目录中的文件与大小信息"""
         target_dir = self._resolve_safe_path(subpath)
@@ -139,11 +149,20 @@ class CodeRunnerService:
                 continue
             is_file = item.is_file()
             stat = item.stat()
+            size = stat.st_size if is_file else 0
+            size_h = self._format_size(size) if is_file else "--"
+            mod_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stat.st_mtime))
+            quoted_filename = urllib.parse.quote(item.name)
+            download_url = f"/api/v1/workspace/download/{quoted_filename}" if is_file else ""
+
             results.append({
                 "name": item.name,
                 "type": "file" if is_file else "directory",
-                "size_bytes": stat.st_size if is_file else 0,
-                "modified_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stat.st_mtime)),
+                "size_bytes": size,
+                "size_human": size_h,
+                "modified": mod_time,
+                "modified_at": mod_time,
+                "download_url": download_url,
             })
         return results
 

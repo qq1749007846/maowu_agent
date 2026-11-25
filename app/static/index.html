@@ -805,7 +805,17 @@
           return;
         }
 
-        container.innerHTML = files.map(f => `
+        const validFiles = files.filter(f => f.type !== 'directory');
+        if (validFiles.length === 0) {
+          container.innerHTML = '<div class="text-slate-400 py-6 text-center">工作区暂无生成文件。可在对话中让老夫执行 Python 生成表格！</div>';
+          return;
+        }
+
+        container.innerHTML = validFiles.map(f => {
+          const dlUrl = f.download_url || `/api/v1/workspace/download/${encodeURIComponent(f.name)}`;
+          const sizeStr = f.size_human || (f.size_bytes ? `${(f.size_bytes/1024).toFixed(1)} KB` : '--');
+          const modTime = (f.modified || f.modified_at || '').slice(0, 16).replace('T', ' ');
+          return `
           <div class="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between space-x-3 hover:border-blue-300 transition-colors">
             <div class="flex items-center space-x-2.5 truncate">
               <div class="w-8 h-8 rounded-lg ${f.name.endsWith('.xlsx') ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'} flex items-center justify-center shrink-0">
@@ -813,15 +823,15 @@
               </div>
               <div class="truncate">
                 <p class="font-medium text-slate-800 truncate">${escapeHtml(f.name)}</p>
-                <p class="text-[10px] text-slate-400">${f.size_human} · 更新于 ${f.modified ? f.modified.slice(0, 16).replace('T', ' ') : ''}</p>
+                <p class="text-[10px] text-slate-400">${sizeStr} · 更新于 ${modTime}</p>
               </div>
             </div>
-            <a href="${f.download_url}" target="_blank" download class="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-medium text-xs border border-blue-200 shrink-0 transition-colors">
+            <a href="${dlUrl}" target="_blank" download="${escapeHtml(f.name)}" class="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-medium text-xs border border-blue-200 shrink-0 transition-colors">
               <i data-lucide="download" class="w-3.5 h-3.5"></i>
               <span>下载</span>
             </a>
           </div>
-        `).join('');
+        `}).join('');
         lucide.createIcons();
       } catch (e) {
         container.innerHTML = `<div class="text-rose-500 py-3">加载文件失败: ${e.message}</div>`;
