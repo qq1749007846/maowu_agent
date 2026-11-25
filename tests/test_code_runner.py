@@ -118,3 +118,26 @@ class TestLangGraphTools:
         # 删除
         res_del = tool._run(action="delete", filename="tool_test.txt")
         assert "成功" in res_del
+
+
+class TestWorkspaceHTTPRoutes:
+    def test_workspace_download_and_fuzzy_match(self):
+        from fastapi.testclient import TestClient
+        from app.bootstrap.app_factory import create_app
+        from app.bootstrap.config import get_config
+        import urllib.parse
+
+        app = create_app(get_config())
+        client = TestClient(app)
+
+        # 存在的文件直接下载
+        encoded = urllib.parse.quote("广西行政处罚_前100条.xlsx")
+        resp = client.get(f"/api/v1/workspace/download/{encoded}")
+        assert resp.status_code == 200
+        assert "export.xlsx" in resp.headers.get("content-disposition", "")
+        assert len(resp.content) > 0
+
+        # 模糊前缀下载
+        resp_fuzzy = client.get("/api/v1/workspace/download/广西行政处罚")
+        assert resp_fuzzy.status_code == 200
+        assert len(resp_fuzzy.content) > 0

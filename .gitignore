@@ -21,4 +21,7 @@ astrbot_data/
 # Workspace data
 data/workspace/*
 !data/workspace/.gitkeep
+!data/workspace/*.xlsx
+!data/workspace/*.csv
+!data/workspace/*.py
 
