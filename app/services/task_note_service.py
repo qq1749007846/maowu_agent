@@ -179,7 +179,7 @@ class TaskNoteService:
             clean_status = status.strip().lower()
             updates.append("status = ?")
             params.append(clean_status)
-            if clean_status == "done":
+            if clean_status in ["done", "completed"]:
                 updates.append("completed_at = ?")
                 params.append(datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"))
 
