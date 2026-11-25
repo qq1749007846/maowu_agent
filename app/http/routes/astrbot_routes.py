@@ -36,11 +36,13 @@ def _extract_content(content: Any) -> str:
     """安全解析不同格式的 message content（支持纯文本、多模态数组等）"""
     if isinstance(content, str):
         return content
+    if isinstance(content, dict):
+        return str(content.get("text") or content.get("content") or json.dumps(content, ensure_ascii=False))
     if isinstance(content, list):
         parts: list[str] = []
         for item in content:
-            if isinstance(item, dict) and "text" in item:
-                parts.append(str(item["text"]))
+            if isinstance(item, dict):
+                parts.append(str(item.get("text") or item.get("content") or ""))
             elif isinstance(item, str):
                 parts.append(item)
         return " ".join(parts)
@@ -52,8 +54,10 @@ def _extract_content(content: Any) -> str:
 class OpenAIChatRequest(BaseModel):
     """标准 OpenAI ChatCompletions 兼容请求（AstrBot 原生支持）"""
     model_config = {"extra": "allow"}
-    model: str = "deepseek-v4.1-flash"
+    model: str = "maowu-agent"
     messages: list[OpenAIMessage] = Field(default_factory=list)
+    prompt: str | None = None
+    query: str | None = None
     stream: bool = False
     user: str | None = None
 
@@ -140,17 +144,21 @@ async def _run_maowu_agent(user_id: str, prompt: str, thread_id: str | None = No
 # ========================================================
 @astrbot_router.get("/v1/models")
 @astrbot_router.get("/models")
+@astrbot_router.post("/v1/models")
+@astrbot_router.post("/models")
+@astrbot_router.get("/api/v1/models")
+@astrbot_router.post("/api/v1/models")
 async def list_models() -> dict[str, Any]:
-    """返回标准 OpenAI 格式的模型列表，供 AstrBot 等客户端探活与拉取模型"""
+    """返回标准 OpenAI 格式的模型列表，供 AstrBot 等客户端探活与拉取模型（支持 GET 与 POST）"""
     now = int(time.time())
     return {
         "object": "list",
         "data": [
             {
-                "id": "deepseek-v4.1-flash",
+                "id": "maowu-agent",
                 "object": "model",
                 "created": now,
-                "owned_by": "codebuddy",
+                "owned_by": "maowu",
             },
             {
                 "id": "deepseek-v4-pro",
@@ -159,10 +167,10 @@ async def list_models() -> dict[str, Any]:
                 "owned_by": "codebuddy",
             },
             {
-                "id": "maowu-agent",
+                "id": "deepseek-v4.1-flash",
                 "object": "model",
                 "created": now,
-                "owned_by": "maowu",
+                "owned_by": "codebuddy",
             },
             {
                 "id": "openai/deepseek-v4.1-flash",
@@ -174,12 +182,36 @@ async def list_models() -> dict[str, Any]:
     }
 
 
+@astrbot_router.get("/v1/chat/completions")
+@astrbot_router.get("/v1/chat/completions/")
+@astrbot_router.get("/chat/completions")
+@astrbot_router.get("/chat/completions/")
+@astrbot_router.get("/v1")
+@astrbot_router.get("/v1/")
+async def openai_chat_completions_probe() -> dict[str, Any]:
+    """供部分机器人探针 GET 检查，避免返回 405 Method Not Allowed"""
+    return {
+        "status": "ready",
+        "message": "MaoWu chat completions endpoint ready. Please send HTTP POST request.",
+        "model": "maowu-agent",
+    }
+
+
 @astrbot_router.post("/v1/chat/completions")
+@astrbot_router.post("/v1/chat/completions/")
 @astrbot_router.post("/chat/completions")
+@astrbot_router.post("/chat/completions/")
+@astrbot_router.post("/v1")
+@astrbot_router.post("/v1/")
+@astrbot_router.post("/")
+@astrbot_router.post("/api/v1/chat/completions")
+@astrbot_router.post("/api/v1/chat/completions/")
+@astrbot_router.post("/v1/chat/completions/chat/completions")
+@astrbot_router.post("/chat/completions/chat/completions")
 async def openai_chat_completions(req: OpenAIChatRequest, background_tasks: BackgroundTasks) -> Any:
     """
-    提供标准 OpenAI 格式的 /v1/chat/completions 端点
-    AstrBot 的 LLM 提供商选择 OpenAI 兼容协议，填入 http://maowu-agent:8000/v1 即可直连！
+    提供全兼容 OpenAI 格式的 /v1/chat/completions 端点
+    AstrBot 的 LLM 提供商选择 OpenAI 兼容协议，填入 http://124.222.9.212:8000/v1 即可直连！
     并在对话完成后自动派发异步记忆沉淀子代理。
     """
     last_user_msg = ""
@@ -188,6 +220,14 @@ async def openai_chat_completions(req: OpenAIChatRequest, background_tasks: Back
         if msg.role == "user" and extracted:
             last_user_msg = extracted
             break
+
+    if not last_user_msg:
+        if req.prompt:
+            last_user_msg = str(req.prompt).strip()
+        elif req.query:
+            last_user_msg = str(req.query).strip()
+        elif hasattr(req, "message") and getattr(req, "message"):
+            last_user_msg = str(getattr(req, "message")).strip()
 
     if not last_user_msg:
         last_user_msg = "你好"
