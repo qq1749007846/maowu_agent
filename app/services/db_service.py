@@ -83,14 +83,13 @@ class MySQLService:
     def get_table_schema(self, table_name: str) -> list[dict[str, Any]]:
         """获取指定表的数据结构定义 (DESCRIBE)"""
         try:
+            # 使用白名单校验表名避免 SQL 注入
+            valid_tables = self.get_tables()
+            if table_name not in valid_tables:
+                raise ValueError(f"Table '{table_name}' does not exist in database '{self.database}'")
+
             with self.get_connection(select_db=True) as conn:
                 with conn.cursor() as cursor:
-                    # 使用白名单校验表名避免 SQL 注入
-                    cursor.execute("SHOW TABLES;")
-                    valid_tables = [list(r.values())[0] for r in cursor.fetchall()]
-                    if table_name not in valid_tables:
-                        raise ValueError(f"Table '{table_name}' does not exist in database '{self.database}'")
-
                     cursor.execute(f"DESCRIBE `{table_name}`;")
                     return cursor.fetchall()
         except Exception as exc:
