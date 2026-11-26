@@ -26,6 +26,7 @@ from ..http.routes import (
     astrbot_router,
     db_router,
     health_router,
+    phase5_router,
     proactive_router,
     runs_router,
     task_note_router,
@@ -44,6 +45,9 @@ async def lifespan(app: FastAPI):
     # 启动异步子代理事件循环
     init_subagents(dispatcher)
     await dispatcher.start()
+    # 订阅第五阶段多端主动推送管道 (AstrBot / Webhook)
+    from app.services.push_service import get_push_service
+    proactive_scheduler.subscribe(get_push_service().on_proactive_message)
     # 启动主动交互事件调度器
     await proactive_scheduler.start()
     yield
@@ -103,6 +107,9 @@ def create_app(config: AppConfig) -> FastAPI:
 
     # 挂载网页抓取与变动监控哨兵路由
     app.include_router(web_watch_router)
+
+    # 挂载第五阶段：周度技术体检报告与多端主动外呼推送路由
+    app.include_router(phase5_router)
 
     # 挂载静态资源与根路径前端交互页面
     if STATIC_DIR.exists():

@@ -1,6 +1,7 @@
 from .astrbot_routes import astrbot_router
 from .db_routes import db_router
 from .health_routes import health_router
+from .phase5_routes import phase5_router
 from .proactive_routes import proactive_router
 from .runs_routes import runs_router
 from .task_note_routes import task_note_router
@@ -18,4 +19,5 @@ __all__ = [
     "workspace_router",
     "task_note_router",
     "web_watch_router",
+    "phase5_router",
 ]
